@@ -1,0 +1,27 @@
+local component = require("component")
+local reactorCheck = require("reactorCheck")
+local reactorHeating = require("reactorHeating")
+local reactorShield = require("shield")
+
+-- local a = reactorCheck.reactorSearchAddress() -- Получаем адреса по порядку: 1 реактор, 2 гейт вход, 3 гейт выход
+-- local reactorAddress = a[1]
+-- print("reactor ="..reactorAddress)
+-- local fluxInAddress = a[2]
+-- print("fluxInAddress ="..fluxInAddress)
+-- local fluxOutAddress = a[3]
+-- print("fluxOutAddress ="..fluxOutAddress) --temporary///////////////////
+
+-- local reactor = component.proxy(reactorAddress)
+-- local fluxIn = component.proxy(fluxInAddress)
+-- local fluxOut = component.proxy(fluxOutAddress)
+
+
+-- for v, i in component.list() do -- Пытаемся найти адрес реактора среди компонентов
+	-- print(v .. " == " .. i)
+-- end
+print("before reactorHeating.startHeating()")
+
+local a = reactorCheck.reactorSearchAddress()
+print("after local a = reactorCheck.getResult()")
+print (a)
+reactorHeating.startHeating()
