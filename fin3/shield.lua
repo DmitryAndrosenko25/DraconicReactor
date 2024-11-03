@@ -25,7 +25,6 @@ local function reactorInfo(info) --- на вход параметр реакто
 end
 
 function shield.runShield()
-	-- os.sleep(0.05)
 	isRun = true
 	isRunExtreme = false
 	print("Shield has been run")
@@ -38,7 +37,6 @@ end
 
 function shield.stopShield()
 	shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") * 1.5)
-	-- os.sleep(0.05)
 	isRun = false
 	isRunExtreme = false
 	print("stopShield() выл вызван, все щиты остановлены. Вроде...")
@@ -46,13 +44,16 @@ function shield.stopShield()
 end
 
 function shield.runShieldExtreme()
-	-- os.sleep(0.05)
 	isRun = false
 	isRunExtreme = true
 	print("Extreme shield has been run")
 	while isRunExtreme do
-		shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 300)	-- ПРИ ТЕСТИРОВАНИИ 13000 ГРАДУСОВ ЩИТ ДЕРЖАЛСЯ В ПРЕДЕЛАХ 8.63% 
-		coroutine.yield() -- Уступает управление							-- НУЖНО ДОБАВИТЬ АЛГОРИТМ ПОНИЖЕНИЯ В ТАКОМ СЛУЧАЕ ЩИТА ДО, НУ Я ХЗ... 2%
+		if (((reactorInfo("maxFieldStrength") / reactorInfo("fieldStrength")) *100) < 4) then -- ПРИ ТЕСТИРОВАНИИ 13000 ГРАДУСОВ ЩИТ ДЕРЖАЛСЯ В ПРЕДЕЛАХ 8.63%
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 300)	 			  -- НУЖНО ДОБАВИТЬ АЛГОРИТМ ПОНИЖЕНИЯ В ТАКОМ СЛУЧАЕ ЩИТА ДО, НУ Я ХЗ... 4%
+		else
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 100) --200
+		end
+		coroutine.yield() -- Уступает управление							
 	end
 	print("Я умер! Умер навсегда! З.Ы. Я был Экстримальный щит")
 end

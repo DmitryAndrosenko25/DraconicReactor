@@ -133,18 +133,23 @@ local function outUpTo (temperatureValue)	-- поднятие рабочей т�
 			if (tCurrent - tMax) > 0.01 then
 				
 				if (tStart - tEnd) > 100 then
-					down = down - (1 * ((tStart - tEnd) * 5000000)) -- 100
+					down = down - (1 * ((tStart - tEnd) * 5000000))
 				elseif (tStart - tEnd) > 10 then
-					down = down - (1 * ((tStart - tEnd) * 500000)) -- 100
+					down = down - (1 * ((tStart - tEnd) * 500000))
 				elseif (tStart - tEnd) > 1 then
-					down = down - (1 * ((tStart - tEnd) * 50000)) -- 100
+					down = down - (1 * ((tStart - tEnd) * 50000))
 				elseif (tStart - tEnd) > 0.5 then
-					down = down - (1 * ((tStart - tEnd) * 5000)) -- 100
+					down = down - (1 * ((tStart - tEnd) * 5000))
 				elseif (tStart - tEnd) > 0.1 then
-					down = down - (1 * ((tStart - tEnd) * 500)) -- 100
-																				-- ИЛИ ТУТ ЕЩЕ ДОБАВИТЬ ЕЛС ИФ ГРАДАЦИЮ 0.05, 0.03, 0.02....
-				elseif (tStart - tEnd) > 0.01 then
-					down = down - (1 * ((tStart - tEnd) * 50)) 					-- 100  НУЖНО ПОПРОБОВАТЬ 100 - ТАК КАК ПРИ ТЕСТИРОВАНИИ 13 000 ГРАДУСОВ СКАКАЛО В ПРЕДЕЛАХ 0.1 ГРАДУСА
+					down = down - (1 * ((tStart - tEnd) * 500)) 
+				elseif (tStart - tEnd) > 0.05 then
+					down = down - (1 * ((tStart - tEnd) * 300)) 
+				elseif (tStart - tEnd) > 0.03 then
+					down = down - (1 * ((tStart - tEnd) * 150))
+				elseif (tStart - tEnd) > 0.02 then
+					down = down - (1 * ((tStart - tEnd) * 100))					-- ИЛИ ТУТ ЕЩЕ ДОБАВИТЬ ЕЛС ИФ ГРАДАЦИЮ 0.05, 0.03, 0.02....
+				elseif (tStart - tEnd) > 0.01 then								-- 100  НУЖНО ПОПРОБОВАТЬ 100 - ТАК КАК ПРИ ТЕСТИРОВАНИИ 13 000 ГРАДУСОВ СКАКАЛО В ПРЕДЕЛАХ 0.1 ГРАДУСА
+					down = down - (1 * ((tStart - tEnd) * 50)) 					
 				else
 					down = down + 1
 				end
@@ -156,7 +161,6 @@ local function outUpTo (temperatureValue)	-- поднятие рабочей т�
 			up = 0
 		end
 		-- Остановка реактора при 90% конвертации
-		-- if ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 100) <= 98 then--10 then 67.6/10368=0.0065
 		if ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 100) >= 90 then --95 then-- 95% (--97% = BOOM!!!)
 			reactor.stopReactor()
 			print((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 100)
@@ -171,9 +175,6 @@ local function outUpTo (temperatureValue)	-- поднятие рабочей т�
 	end
 end
 outUpTo(tMax)
-
-
-
 
 
 print("temperature " .. "__________" .. rInfo("temperature"))
