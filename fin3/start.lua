@@ -1,3 +1,9 @@
+-- Мне кажется что этот файл ненужный рудимент
+
+
+
+
+
 reactorCheck = require("reactorCheck")
 reactorHeating = require("reactorHeating")
 shield = require("shield")
@@ -51,7 +57,7 @@ local function starter()				-- Запуск разогретого до 2000 р�
     end
 end
 
-local function outUpTo (temperatureValue)	-- поднятие рабочей температуры до temperatureValue (или понижение?????)
+local function outUpTo (temperatureValue)	-- поднятие рабочей температуры до temperatureValue
 	local temperatureValueMax = temperatureValue
 	
 	if rInfo("temperature") < 2000 then
