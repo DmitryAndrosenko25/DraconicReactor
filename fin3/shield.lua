@@ -48,8 +48,9 @@ function shield.runShieldExtreme()
 	isRunExtreme = true
 	print("Extreme shield has been run")
 	while isRunExtreme do
-		if (((reactorInfo("maxFieldStrength") / reactorInfo("fieldStrength")) *100) < 4) then -- ПРИ ТЕСТИРОВАНИИ 13000 ГРАДУСОВ ЩИТ ДЕРЖАЛСЯ В ПРЕДЕЛАХ 8.63%
-			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 300)	 			  -- НУЖНО ДОБАВИТЬ АЛГОРИТМ ПОНИЖЕНИЯ В ТАКОМ СЛУЧАЕ ЩИТА ДО, НУ Я ХЗ... 4%
+		--if (((reactorInfo("maxFieldStrength") / reactorInfo("fieldStrength")) *100) < 5) then -- ПРИ ТЕСТИРОВАНИИ 13000 ГРАДУСОВ ЩИТ ДЕРЖАЛСЯ В ПРЕДЕЛАХ 8.63%
+		if ((reactorInfo("maxFieldStrength") * 0.04) <	reactorInfo("fieldStrength")) then -- ПРИ ТЕСТИРОВАНИИ 13000 ГРАДУСОВ ЩИТ ДЕРЖАЛСЯ В ПРЕДЕЛАХ 8.63%
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 300)	 			  -- НУЖНО ДОБАВИТЬ АЛГОРИТМ ПОНИЖЕНИЯ В ТАКОМ СЛУЧАЕ ЩИТА ДО, НУ Я ХЗ... 5%
 		else
 			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 100) --200
 		end
