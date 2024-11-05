@@ -60,6 +60,8 @@ function reactorCheck.reactorSearchAddress() -- Создаем функцию д
 				local startFlow = rInfoCheck("fieldStrength") -- Запоминаем начальную силу поля реактора
 				print("please wait...")
 				os.sleep(3) -- Ждем одну секунду																	!!!!!!!!!!!!!!!!!!!!!!!!
+				
+				
 				local endFlow = rInfoCheck("fieldStrength") -- Запоминаем конечную силу поля реактора
 				gate.setFlowOverride(0) -- Устанавливаем поток для первого гейта в 0
 				if startFlow < endFlow then -- Если сила поля увеличилась, то
