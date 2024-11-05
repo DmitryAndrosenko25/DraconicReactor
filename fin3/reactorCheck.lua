@@ -8,10 +8,10 @@ local fluxOutAddress = "fluxOut="
 local reactor = nil
 
 local function rInfoCheck(info) -- Создаем локальную функцию для получения информации о реакторе
-		local reactorF = component.proxy(reactorAddress) -- Получаем объект реактора по адресу		
-		local st = reactorF.getReactorInfo() -- Получаем статус реактора
-		return st[info] -- Возвращаем значение по ключу
-	end
+	local reactorF = component.proxy(reactorAddress) -- Получаем объект реактора по адресу		
+	local st = reactorF.getReactorInfo() -- Получаем статус реактора
+	return st[info] -- Возвращаем значение по ключу
+end
 
 function reactorCheck.reactorSearchAddress() -- Создаем функцию для поиска адресов адаптеров reactorCheck.
 	local f = io.open(logFile, "r") -- Пытаемся открыть файл для чтения
