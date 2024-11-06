@@ -1,5 +1,3 @@
--- вернуть таблицу {"reactorAddress", isValidTxT(boolean), fluxIn, fluxOut} status
---running, stopping, cold, warming_up, cooling!!!!!!!!!!!!
 local M = {}
 
 local logFile = "reactorInfo.txt" -- Объявляем локальные переменные для имени файла и адресов адаптеров
@@ -33,10 +31,8 @@ end
 
 function M.getReactorAddress(fileName) -- устанавливает адрес реактора и проверяет файл настроек на ВАЛИДНОСТЬ
 	local result = false
-	-- local component = require("component")	
 	for d, _ in component.list("draconic_reactor") do -- Пытаемся найти адрес реактора среди компонентов
 		reactorAddress = d
-													print("line 39 ".. reactorAddress) ----------------------
 		result = true
 	end	
 	local f = io.open(fileName, "r") -- Пытаемся открыть файл для чтения
@@ -45,67 +41,19 @@ function M.getReactorAddress(fileName) -- устанавливает адрес 
 		local readed = {} -- Создаем локальную таблицу для хранения адресов
 		for var in f:lines() do -- Читаем файл построчно и добавляем строки в таблицу
 			table.insert(readed, var)
-													print("line 48 "..var)--------------------
 		end
 		f:close() -- Закрываем файл		
 		for _, v in pairs(readed) do -- Перебираем таблицу с адресами
-													print ("line 52 ТЫ вообще сюда заходишь???" ..v)---------------
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													
-													-- print ("line 52 ТЫ вообще сюда заходишь???" .."reactor=" .. reactorAddress)---------------
-			local testLine = v
-			print(testLine:find(reactorAddress)) --then -- Если строка содержит адрес реактора, то
-			print("line 56  "..v)
-			if testLine == ("reactor=" .. reactorAddress) then -- Если строка содержит адрес реактора, то
-				print(testLine)
-				print(reactorAddress)
-				print ("line 57 #############################################")
-			end
-			
-			
-			if v:find(reactorAddress) then -- Если строка содержит адрес реактора, то
+			if string.find(v, reactorAddress, 1, true) then -- Если строка содержит адрес реактора, то
 				print("Адрес реактора в файле прочитан верно - "..reactorAddress) -- Выводим сообщение
 				print(string.format("Файл настроек %s проверен", fileName)) -- Выводим сообщение
 				isValidFile = true -- Подтверждаем что файл "не бит, не крашен"
 				
 				for _, w in pairs(readed) do -- Перебираем таблицу с адресами
-					if w:find(fluxInAddress) then -- Если строка содержит адрес входного Flux Gate, то
+					if w:find(fluxInAddress, 1, true) then -- Если строка содержит адрес входного Flux Gate, то
 						fluxInAddress = string.sub(w, ((w:find('='))+1)) -- Обрезаем строку до адреса
 						print("Адрес входного flux gate с файла прочитан - "..fluxInAddress) -- Выводим сообщение
-					elseif w:find(fluxOutAddress) then -- Если строка содержит адрес выходного Flux Gate, то
+					elseif w:find(fluxOutAddress, 1, true) then -- Если строка содержит адрес выходного Flux Gate, то
 						fluxOutAddress = string.sub(w, ((w:find('='))+1)) -- Обрезаем строку до адреса
 						print("Адрес выходного flux gate с файла прочитан - "..fluxOutAddress) -- Выводим сообщение
 					end
@@ -123,8 +71,6 @@ function M.getGatesAddresses()			-- метод получает адреса г�
 	local firstGate = nil
 	local secondGate = nil
 
-
-	
 	if (M.getReactorAddress(logFile)) then -- если нашли реальный адрес реактора ТО
 		-- local component = require("component")
 		local reactor = component.proxy(reactorAddress)
@@ -139,9 +85,7 @@ function M.getGatesAddresses()			-- метод получает адреса г�
 				end			
 				if #t == 2 then -- Если в таблице есть два адреса, то
 					firstGate = t[1] -- Получаем адреса из таблицы
-											print(firstGate)---------------------------------------------------
 					secondGate = t[2]
-											print(secondGate)---------------------------------------------------
 					gate = component.proxy(firstGate) -- Получаем объекты Flux Gate по адресам
 					gate2 = component.proxy(secondGate)				
 				else 						-- Если в таблице не два адреса, то
@@ -160,8 +104,6 @@ function M.getGatesAddresses()			-- метод получает адреса г�
 					os.sleep(3) -- Ждем три секунды
 					local endFlow = rCheck("fieldStrength") -- Запоминаем конечную силу поля реактора
 					gate.setFlowOverride(0) -- Устанавливаем поток для первого гейта в 0
-					-- gate.setOverrideEnabled(false) -- Выключаем режим переопределения потока для обоих гейтов
-					-- gate2.setOverrideEnabled(false)
 					if startFlow < endFlow then -- Если сила поля увеличилась, то
 						fluxInAddress = firstGate -- Первый гейт является входным, а второй - выходным
 						fluxOutAddress = secondGate					
@@ -197,63 +139,21 @@ function M.getGatesAddresses()			-- метод получает адреса г�
 					writeAddresses()					--ЗАПИСЬ АДРЕСОВ В ФАЙЛ
 				--====================================================================================================================	
 				elseif (rCheck("status") == "running") then											--  STATUS running
-					-- gate.setOverrideEnabled(true) -- Включаем режим переопределения потока для обоих гейтов
-					-- gate2.setOverrideEnabled(true)
 					local levelGate_1 = gate.getFlow()
-						print(levelGate_1)---------------------
 					local levelGate_2 = gate2.getFlow()
-						print(levelGate_2)---------------------
 					local reactorShield = rCheck("fieldDrainRate")	
-					-- local reactorOutput = rCheck("generationRate")
-					
-					-- function find_closest_gate(value, gate1_value, gate2_value) -- Внутренняя функция сравнения по модулю
-						-- local diff1 = math.abs(value - gate1_value)
-						-- local diff2 = math.abs(value - gate2_value)
-						-- if diff1 < diff2 then
-							-- return 1 -- Значит первый гейт "ближе" к значению
-						-- else
-							-- return 2
-						-- end
-					-- end
 					local diff1 = math.abs(reactorShield - levelGate_1)
 					local diff2 = math.abs(reactorShield - levelGate_2)
-					
-					
-					
-					
-					
 					if diff1 < diff2 then -- Сравнение двух гейтов по модулю с щитом
 						fluxInAddress = firstGate -- Первый гейт является входным, а второй - выходным
 						fluxOutAddress = secondGate					
-						print(fluxInAddress)---------------------
-						print(fluxOutAddress)------------------------------
 					else						
 						fluxOutAddress = firstGate -- Первый гейт является выходным, а второй - входным?
 						fluxInAddress = secondGate
-						print(fluxInAddress)-------------------------------
-						print(fluxOutAddress)----------------------------
 					end
-					
-					-- if (find_closest_gate(reactorOutput, levelGate_1, levelGate_2)) == 1 then
-						-- fluxOutAddress = firstGate -- Первый гейт является выходным, а второй - входным?
-					-- else
-						-- fluxOutAddress = secondGate
-					-- end
 					
 					if (fluxInAddress == fluxOutAddress) then -- проверка чтобы гейты были разными
 						print("Во время тестирования гейтов по модулю произошло совпадениие значений")
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
-						
 						os.exit()
 					end
 					writeAddresses()					--ЗАПИСЬ АДРЕСОВ В ФАЙЛ
@@ -273,7 +173,8 @@ function M.getGatesAddresses()			-- метод получает адреса г�
 					else	
 						fluxOutAddress = firstGate -- Первый гейт является выходным, а второй - входным
 						fluxInAddress = secondGate
-					end				
+					end
+					print("Поиск гейтов в статусе реактора stopping прошло удачно")
 					writeAddresses()					--ЗАПИСЬ АДРЕСОВ В ФАЙЛ
 				--=====================================================================================================================	
 				elseif (rCheck("status") == "cooling") then																	--  STATUS cooling
