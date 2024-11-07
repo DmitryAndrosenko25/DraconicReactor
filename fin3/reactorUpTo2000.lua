@@ -1,11 +1,9 @@
 local reactorHeating = {}
 
 local component = require("component")
-local reactorInit = require("reactorInit")
-local adresses = reactorInit.getGatesAddresses()
-local reactor = component.proxy(adresses[1]) -- Подключение к реактору и гейтам
-local fluxInGate = component.proxy(adresses[2])
-local fluxOutGate = component.proxy(adresses[3])
+local reactor = nil
+local fluxInGate = nil
+local fluxOutGate = nil
 
 local function rInfoHeating(info) --- на вход параметр реактора в string ..на выход значение 
 	local st = reactor.getReactorInfo()
@@ -13,18 +11,15 @@ local function rInfoHeating(info) --- на вход параметр реакт�
 end
 
 local function starter()
-	-- local isStarted = false
 	print("Реактор, видимо, не в статусе разогрева, а в статусе " .. rInfoHeating("status"))
     reactor.chargeReactor() -- ВКЛ разогрев реактора
 	while rInfoHeating("status") ~= "warming_up" do
-		print("Стартер реактора гудит, пердит...")
+		print("Попытка перевезти реактор в режим зарядки...")
 		reactor.stopReactor() -- stopReactor
 		reactor.chargeReactor() -- ВКЛ разогрев реактора
 		os.sleep(1)
 	end	
-	print("Стартер отработал на ура. Статус реактора " .. rInfoHeating("status"))
-	-- isStarted = true
-	-- return isStarted
+	print("Удачно. Статус реактора " .. rInfoHeating("status"))
 end
 
 local function charge50field() -- Заряд щита	
@@ -87,7 +82,10 @@ fluxInGate.setFlowOverride(0)
 print("Ядро разогрето до 2000 градусов и готово к запуску")
 end
 
-function reactorHeating.to2000()    
+function reactorHeating.to2000(adresReactor, adresIn, adresOut)
+	reactor = component.proxy(adresReactor) -- Подключение к реактору и гейтам
+	fluxInGate = component.proxy(adresIn)
+	fluxOutGate = component.proxy(adresOut)
     if(rInfoHeating("status") ~= "warming_up") then --Если не греется, то юзаем стартер
 		starter()	
 	end		
@@ -99,4 +97,5 @@ function reactorHeating.to2000()
 	end	
     heating() --  вызов функции разогрева реактора
 end
+
 return reactorHeating

@@ -1,5 +1,5 @@
 local shield = {}
-component = require("component")
+local component = require("component")
 local shieldreactor = nil
 local shieldfluxIn = nil
 local shieldfluxOut = nil
@@ -52,7 +52,7 @@ function shield.runShieldExtreme()
 		if ((reactorInfo("maxFieldStrength") * 0.04) <	reactorInfo("fieldStrength")) then -- ПРИ ТЕСТИРОВАНИИ 13000 ГРАДУСОВ ЩИТ ДЕРЖАЛСЯ В ПРЕДЕЛАХ 8.63%
 			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 300)	 			  -- НУЖНО ДОБАВИТЬ АЛГОРИТМ ПОНИЖЕНИЯ В ТАКОМ СЛУЧАЕ ЩИТА ДО, НУ Я ХЗ... 5%
 		else
-			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 100) --200
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 0) --200
 		end
 		coroutine.yield() -- Уступает управление							
 	end

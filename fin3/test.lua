@@ -23,8 +23,11 @@ end
 
 if (rInfo("temperature") < 2000) then
 	print("В потоке тест стартую поднятие температуры до 2000")
-	reactorUpTo2000.to2000()
-	print("Программа отработала ДО КОНЦА")	
+	reactorUpTo2000.to2000(reactorAddress, fluxInAddress, fluxOutAddress)
+	
+	print("Программа отработала ДО КОНЦА")
+	print("Теперь останавливаем реактор")
+	reactor.stopReactor()	
 end
 
 
