@@ -1,3 +1,8 @@
+
+
+-- Этот файл должен в дальнейшем быть точкой входа в программу 
+
+
 reactorInit = require("reactorInit")
 -- reactorHeating = require("reactorHeating")
 -- shield = require("shield")

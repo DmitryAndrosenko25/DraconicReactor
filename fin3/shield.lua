@@ -1,16 +1,16 @@
+-- ЭТОТ МОДУЛЬ КОНТРОЛИРУЕТ ЩИТ В СОСТОЯНИИ
+-- РЕАКТОРА running / stopping
 local shield = {}
 local component = require("component")
 local shieldreactor = nil
 local shieldfluxIn = nil
-local shieldfluxOut = nil
 local myLevel = nil
 local isRunExtreme = false
 local isRun = false
 
-function shield.setReactor(shieldReactor, shieldFluxIn, shieldFluxOut)
-	shieldreactor = component.proxy(shieldReactor)
-	shieldfluxIn = component.proxy(shieldFluxIn)
-	shieldfluxOut = component.proxy(shieldFluxOut)
+function shield.setReactor(adressReactor, ardessFluxIn)
+	shieldreactor = component.proxy(adressReactor)
+	shieldfluxIn = component.proxy(ardessFluxIn)
 	shieldfluxIn.setOverrideEnabled(true)
 	print("reactor shield is set!")
 end

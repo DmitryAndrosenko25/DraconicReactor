@@ -1,3 +1,5 @@
+-- ЭТОТ МОДУЛЬ ИНИЦИАЛИЗИРУЕТ РЕАКТОР, НАХОДИТ ЕГО АДРЕСС
+-- А ТАКЖЕ АДРЕСА ГЕЙТОВ. ВСЕ АДРЕСА ВОЗВРАЩАЕТ ТАБЛИЦЕЙ
 local M = {}
 
 local logFile = "reactorInfo.txt" -- Объявляем локальные переменные для имени файла и адресов адаптеров
@@ -29,7 +31,7 @@ local function rCheck(info) -- Создаем локальную функцию 
 	return st[info] -- Возвращаем значение по ключу
 end
 
-function M.getReactorAddress(fileName) -- устанавливает адрес реактора и проверяет файл настроек на ВАЛИДНОСТЬ
+local function getReactorAddress(fileName) -- устанавливает адрес реактора и проверяет файл настроек на ВАЛИДНОСТЬ
 	local result = false
 	for d, _ in component.list("draconic_reactor") do -- Пытаемся найти адрес реактора среди компонентов
 		reactorAddress = d
@@ -71,12 +73,12 @@ function M.getGatesAddresses()			-- метод получает адреса г�
 	local firstGate = nil
 	local secondGate = nil
 
-	if (M.getReactorAddress(logFile)) then -- если нашли реальный адрес реактора ТО
+	if (getReactorAddress(logFile)) then -- если нашли реальный адрес реактора ТО
 		-- local component = require("component")
 		local reactor = component.proxy(reactorAddress)
 		if (not isValidFile) then
-			if ((rCheck("maxFuelConversion") * 0.4) < rCheck("fuelConversion")) then
-				print("Обслужите реактор, перезапустите программу")
+			if ((rCheck("maxFuelConversion") * 0.5) < rCheck("fuelConversion")) then				-- ТУТ проходит проверка на 
+				print("Обслужите реактор, перезапустите программу")									-- количество переработаного топлива
 				os.exit()
 			else
 				local t = {} -- Создаем локальную таблицу для хранения адресов Flux Gate
@@ -146,11 +148,15 @@ function M.getGatesAddresses()			-- метод получает адреса г�
 					local diff2 = math.abs(reactorShield - levelGate_2)
 					if diff1 < diff2 then -- Сравнение двух гейтов по модулю с щитом
 						fluxInAddress = firstGate -- Первый гейт является входным, а второй - выходным
-						fluxOutAddress = secondGate					
+						fluxOutAddress = secondGate
 					else						
 						fluxOutAddress = firstGate -- Первый гейт является выходным, а второй - входным?
 						fluxInAddress = secondGate
 					end
+						gate.setOverrideEnabled(true)			-- Этот блок
+						gate2.setOverrideEnabled(true)			-- нужен для того
+						gate.setFlowOverride(levelGate_1)		-- чтобы устранить возможность
+						gate2.setFlowOverride(levelGate_2)		-- состояния гейтов в ручном режиме
 					
 					if (fluxInAddress == fluxOutAddress) then -- проверка чтобы гейты были разными
 						print("Во время тестирования гейтов по модулю произошло совпадениие значений")
@@ -162,7 +168,7 @@ function M.getGatesAddresses()			-- метод получает адреса г�
 					gate.setOverrideEnabled(true) -- Включаем режим переопределения потока для обоих гейтов
 					gate2.setOverrideEnabled(true)
 					local reactorShieldStart = rCheck("fieldStrength")
-					gate.setFlowOverride(rCheck("fieldDrainRate") * 2) -- Устанавливаем поток для первого гейта в 0
+					gate.setFlowOverride(rCheck("fieldDrainRate") * 1.5) -- Устанавливаем поток для первого гейта в 0
 					gate2.setFlowOverride(rCheck("fieldDrainRate") * 0.99) -- Устанавливаем поток для второго гейта в 0
 					os.sleep(2)
 					local reactorShieldEnd = rCheck("fieldStrength")
@@ -174,6 +180,8 @@ function M.getGatesAddresses()			-- метод получает адреса г�
 						fluxOutAddress = firstGate -- Первый гейт является выходным, а второй - входным
 						fluxInAddress = secondGate
 					end
+					gate.setFlowOverride(rCheck("fieldDrainRate") * 1.5)	-- ЭТИ строки нужны чтобы тебе ебало не порвало, 
+					gate2.setFlowOverride(rCheck("fieldDrainRate") * 1.5)	-- пока реактор охлажнается
 					print("Поиск гейтов в статусе реактора stopping прошло удачно")
 					writeAddresses()					--ЗАПИСЬ АДРЕСОВ В ФАЙЛ
 				--=====================================================================================================================	
