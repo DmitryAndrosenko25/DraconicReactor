@@ -81,17 +81,17 @@ local function outUpTo (temperatureValue)	-- поднятие рабочей т�
         tDelta = tEnd - tStart
         OutFlow = fluxOut.getFlow()
 		
-		if (tDelta < ((tMax - tCurrent) / 50)) then -- 50
-			fluxOut.setFlowOverride(rInfo("generationRate") * (tMax / tCurrent) + 1)		
-		elseif (tDelta > ((tMax - tCurrent) / 42)) then	 --40
+		if (tDelta < ((tMax - tCurrent) / 20)) then -- 50
+			-- fluxOut.setFlowOverride(rInfo("generationRate") * (tMax / tCurrent) + 1)		-- СТАРАЯ ВЕРСИЯ
+			fluxOut.setFlowOverride((rInfo("generationRate") * (tMax / tCurrent)) + ((tMax - tCurrent) /10 ))	-- РОСТ МОЖЕТ БЫТЬ СЛИШКОМ БЫСТРЫЙ	
+		elseif (tDelta > ((tMax - tCurrent) / 50)) then	 --40
 			fluxOut.setFlowOverride(rInfo("generationRate"))
 		end        
 		
     end
     print("Реактор разогрет до ", rInfo("temperature"))
 	fluxOut.setFlowOverride( rInfo("generationRate"))
-	-- shield.stopShield()
-	-- coroutine.resume(coroutineShield)
+	
 	
 	-- ========================= hold 8 k ====================
 	
