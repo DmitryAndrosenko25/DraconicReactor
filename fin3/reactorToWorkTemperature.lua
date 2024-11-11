@@ -7,7 +7,7 @@ local component = require("component")
 local shield = require("shield")
 
 local reactor = nil
-local fluxInGate = nil
+-- local fluxInGate = nil
 local fluxOutGate = nil
 
 local function rInfo(info) --- на вход параметр реактора в string ..на выход значение 
@@ -43,15 +43,14 @@ local function starter()				-- Запуск разогретого до 2000 р�
     end
 end
 
-function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fluxOutAddress)
+function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fluxOutAddress, tempMax)
 	reactor = component.proxy(reactorAddress) -- Подключение к реактору и гейтам
 	fluxInGate = component.proxy(fluxInAddress)
 	fluxOutGate = component.proxy(fluxOutAddress)
-	
-	
+		
 	--===================================================================================
 	print("Начинаются попытки установки безопасного щита")
-	shield.setReactor(reactorAddress, fluxInAddress, fluxOutAddress)	--\
+	shield.setReactor(reactorAddress, fluxInAddress)	--\
 	shield.setLevel(1.5)												 --\ ~33% щита
 	local coroutineShield = coroutine.create(shield.runShield)		 	 --/ запуск щита
 	coroutine.resume(coroutineShield) -- Выведет "Начало корутины"		--/
@@ -61,6 +60,46 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 	if rInfo("status") ~= "running" then
 		starter()		
 	end
+	
+	--=============================ОСНОВНАЯ ЧАСТЬ РАЗОГРЕВА==========================================
+	print(string.format("Разогрев ректора до %d", tempMax))
+	fluxOutGate.setOverrideEnabled(true)
+    fluxOutGate.setFlowOverride(rInfo("generationRate")) -- минимальный старт разогрева
+	
+	local tCurrent = rInfo("temperature")
+	local tStart = nil
+	local tEnd = nil
+	local tDelta = nil
+	-- local OutFlow = nil
+	
+	while tCurrent < (tempMax) do 
+		coroutine.resume(coroutineShield)
+		tCurrent = rInfo("temperature")
+        tStart = rInfo("temperature")
+        os.sleep(0.05) 
+        tEnd = rInfo("temperature")
+        tDelta = tEnd - tStart
+        -- OutFlow = fluxOutGate.getFlow()
+		
+
+
+
+		if (tDelta < ((tempMax - tCurrent) / 20)) then -- 50
+			-- fluxOutGate.setFlowOverride(rInfo("generationRate") * (tempMax / tCurrent) + 1)		-- СТАРАЯ ВЕРСИЯ
+			fluxOutGate.setFlowOverride((rInfo("generationRate") * (tempMax / tCurrent)) + ((tempMax - tCurrent) /10 ))	-- РОСТ МОЖЕТ БЫТЬ СЛИШКОМ БЫСТРЫЙ	
+		elseif (tDelta > ((tempMax - tCurrent) / 50)) then	 --40
+			fluxOutGate.setFlowOverride(rInfo("generationRate"))
+		end        
+		
+    end
+    print("Реактор разогрет до ", rInfo("temperature"))
+	fluxOutGate.setFlowOverride( rInfo("generationRate"))
+	
+	
+	
+	
+	
+	
 	
 	
 	

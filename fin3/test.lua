@@ -1,6 +1,7 @@
 local component = require("component")
 local reactorInit = require("reactorInit")
 local reactorUpTo2000 = require("reactorUpTo2000")
+local reactorToWorkTemperature = require("reactorToWorkTemperature")
 -- local shield = require("shield")
 
 local a = reactorInit.getGatesAddresses() -- Получаем адреса по порядку: 1 реактор, 2 гейт вход, 3 гейт выход
@@ -11,8 +12,8 @@ print("fluxInAddress ="..fluxInAddress)
 local fluxOutAddress = a[3]
 print("fluxOutAddress ="..fluxOutAddress) --temporary///////////////////
 
-reactorInit = nil			-- Эти две строки нужны 
-collectgarbage("collect")	-- чтобы избавится от модуля и освободить память
+-- reactorInit = nil			-- Эти две строки нужны 
+-- collectgarbage("collect")	-- чтобы избавится от модуля и освободить память  НЕ РАБОТАЕТ
 
 local reactor = component.proxy(reactorAddress)
 local fluxIn = component.proxy(fluxInAddress)
@@ -26,7 +27,8 @@ end
 --[[=======================================================================
 		ЭТОТ БЛОК НУЖЕН ИСКЛЮЧИТЕЛЬНО ДЛЯ ТЕСТИРОВАНИЯ ПРОГРАММЫ]]--
 
-
+local tempMAX = 13000
+ -- tempMAX = 13000
 
 
 --=======================================================================
@@ -38,4 +40,4 @@ if (rInfo("temperature") < 2000) then
 end
 
 
-
+reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fluxOutAddress, tempMAX)

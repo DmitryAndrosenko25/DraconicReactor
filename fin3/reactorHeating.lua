@@ -82,9 +82,13 @@ end
 function reactorHeating.startHeating()    
     if (rInfoHeating("maxFieldStrength")/2) > rInfoHeating("fieldStrength") then
 		charge50field() --  вызов функции заряда щита
+	else
+		print("щит заряжен")
 	end
 	if (rInfoHeating("maxEnergySaturation")/2) > rInfoHeating("energySaturation") then
 		charge50saturation() --вызов функции сатурации
+	else
+		print("Сатурации достаточно для запуска реактора")
 	end	
     heating() --  вызов функции разогрева реактора
 end
