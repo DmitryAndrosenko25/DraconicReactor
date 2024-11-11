@@ -1,7 +1,7 @@
 local component = require("component")
 local reactorInit = require("reactorInit")
 local reactorUpTo2000 = require("reactorUpTo2000")
-local shield = require("shield")
+-- local shield = require("shield")
 
 local a = reactorInit.getGatesAddresses() -- Получаем адреса по порядку: 1 реактор, 2 гейт вход, 3 гейт выход
 local reactorAddress = a[1]
