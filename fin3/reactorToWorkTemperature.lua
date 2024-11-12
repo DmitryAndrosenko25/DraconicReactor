@@ -83,10 +83,13 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 		
 
 
-
-		if (tDelta < ((tempMax - tCurrent) / 20)) then -- 50
+				-- 13000-7000/20 = 300
+		if (tDelta < ((tempMax - tCurrent) / 100)) then -- 50
 			-- fluxOutGate.setFlowOverride(rInfo("generationRate") * (tempMax / tCurrent) + 1)		-- СТАРАЯ ВЕРСИЯ
 			fluxOutGate.setFlowOverride((rInfo("generationRate") * (tempMax / tCurrent)) + ((tempMax - tCurrent) /10 ))	-- РОСТ МОЖЕТ БЫТЬ СЛИШКОМ БЫСТРЫЙ	
+		
+		
+				--13000-7000/50 = 120
 		elseif (tDelta > ((tempMax - tCurrent) / 50)) then	 --40
 			fluxOutGate.setFlowOverride(rInfo("generationRate"))
 		end        
