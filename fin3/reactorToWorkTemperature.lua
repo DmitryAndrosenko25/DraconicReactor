@@ -72,7 +72,15 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 	local tDelta = nil
 	local outFlow = fluxOutGate.getFlow()
 	local multy = 1
-	local onePercentLeft = nil
+	local pulty = 1
+	-- local onePercentLeft = nil
+	-- local tempSpeed = nil
+	
+	local extraStop1 = true
+	local extraStop2 = true
+	local extraStop3 = true
+	
+	
 	
 	while tCurrent <= (tempMax) do 
 		coroutine.resume(coroutineShield)
@@ -80,6 +88,102 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
         os.sleep(0.05) 
         tEnd = rInfo("temperature")
         tDelta = (tEnd - tCurrent)
+		multy = 1
+		--==================================================================================
+		-- print("energySaturation " .. "__________" .. rInfo("energySaturation"))
+		-- print("maxEnergySaturation " .. "__________" .. rInfo("maxEnergySaturation"))
+		-- ОБРАЗЕЦ РАБОЧЕГО АЛГОРИТМА
+		--[[
+		if (tDelta < ((tempMax - tCurrent) / 200)) then -- 50
+			-- fluxOutGate.setFlowOverride(rInfo("generationRate") * (tempMax / tCurrent) + 1)		-- СТАРАЯ ВЕРСИЯ
+			fluxOutGate.setFlowOverride((rInfo("generationRate") * (tempMax / tCurrent)) + ((tempMax - tCurrent) /10 ))	-- РОСТ МОЖЕТ БЫТЬ СЛИШКОМ БЫСТРЫЙ	
+		elseif (tDelta > ((tempMax - tCurrent) / 100)) then	 --40
+			fluxOutGate.setFlowOverride(rInfo("generationRate"))
+		end 
+		
+		
+		
+		--]]
+		-- if (tDelta < ((tempMax - tCurrent) / 200)) then -- 50
+			-- Это почти идеал!!!!!!!!!!!
+			
+			-- fluxOutGate.setFlowOverride((rInfo("generationRate") * (tempMax / tCurrent)) + ((tempMax - tCurrent) /10 ))	-- РОСТ МОЖЕТ БЫТЬ СЛИШКОМ БЫСТРЫЙ	
+		-- elseif (tDelta > ((tempMax - tCurrent) / 100)) then	 --40
+			-- fluxOutGate.setFlowOverride(rInfo("generationRate"))
+		-- end 
+		
+		
+		if (tDelta < ((tempMax - tCurrent) / 350)) then -- 200!!!!
+			-- Это почти идеал!!!!!!!!!!!
+			
+			fluxOutGate.setFlowOverride((rInfo("generationRate") * (tempMax / tCurrent)) + ((tempMax - tCurrent) /5 ))	-- 10!!! РОСТ МОЖЕТ БЫТЬ СЛИШКОМ БЫСТРЫЙ	
+		elseif (tDelta > ((tempMax - tCurrent) / 100)) then	 --40
+			fluxOutGate.setFlowOverride(rInfo("generationRate"))
+		end
+		--==================================================================================
+		--[[
+		if (((rInfo("maxEnergySaturation") * 0.5 ) > rInfo("energySaturation")) and extraStop) then -- Экстренный стопкран
+			extraStop1 = false
+			-- fluxOutGate.setFlowOverride(rInfo("generationRate"))			
+			fluxOutGate.setFlowOverride(1)			
+		end
+		
+		if (((rInfo("maxEnergySaturation") * 0.2 ) > rInfo("energySaturation")) and extraStop) then -- Экстренный стопкран
+			extraStop2 = false
+			-- fluxOutGate.setFlowOverride(rInfo("generationRate"))			
+			fluxOutGate.setFlowOverride(1)			
+		end
+		
+		if (((rInfo("maxEnergySaturation") * 0.04 ) > rInfo("energySaturation")) and extraStop) then -- Экстренный стопкран
+			extraStop3 = false
+			-- fluxOutGate.setFlowOverride(rInfo("generationRate"))			
+			fluxOutGate.setFlowOverride(1)		
+		end
+		
+		
+		if ((tempMax - tCurrent) > 1000) then -- если РАЗНИЦА температур больше 1000
+			multy = multy * 10
+		end		
+		if ((tempMax - tCurrent) > 100) then -- если РАЗНИЦА температур больше 100
+			multy = multy * 10
+		end
+		if ((tempMax - tCurrent) < 10) then -- если РАЗНИЦА температур больше 10
+			multy = 5
+		end
+		
+		
+		if (tDelta < ((tempMax - tCurrent) / 200 / 100)) then 
+			fluxOutGate.setFlowOverride(rInfo("generationRate") * (tempMax / tCurrent) + multy + pulty)
+			pulty = pulty + 1
+			
+		elseif (tDelta > ((tempMax - tCurrent) / 40 / 100)) then 
+			fluxOutGate.setFlowOverride(rInfo("generationRate") * (tempMax / tCurrent))
+			pulty = pulty - 1
+		elseif (tDelta > ((tempMax - tCurrent) / 1 / 100)) then 
+			fluxOutGate.setFlowOverride(rInfo("generationRate"))
+			pulty = 1
+		end
+		--]]
+		--========================================================================================================
+		
+		--[[
+			-- fluxOutGate.setFlowOverride(rInfo("generationRate") * (tempMax / tCurrent) + 1)		-- СТАРАЯ ВЕРСИЯ
+									-- fluxOutGate.setFlowOverride((rInfo("generationRate") * (tempMax / tCurrent)) + ((tempMax - tCurrent) /10 ))	-- РОСТ МОЖЕТ БЫТЬ СЛИШКОМ БЫСТРЫЙ	
+			-- fluxOutGate.setFlowOverride((rInfo("generationRate") * (tempMax / tCurrent)) + ((tempMax - tCurrent) * 100 ) + 10)	-- /10     РОСТ МОЖЕТ БЫТЬ СЛИШКОМ БЫСТРЫЙ	
+		
+		
+		-- elseif (tDelta > ((tempMax - tCurrent) / 10)) then	 --40
+			-- tempSpeed = fluxOutGate.getFlow()
+			-- fluxOutGate.setFlowOverride(fluxOutGate.getFlow() * 0.9999)
+		
+		
+		-- elseif (tDelta > ((tempMax - tCurrent) * 1)) then	 --40
+			-- fluxOutGate.setFlowOverride(rInfo("generationRate"))
+		-- end 
+		
+		
+		
+		
 		onePercentLeft = ((tempMax - tCurrent) * 0.01)	-- (13 000 - 8 320) = 4 680 * 0.01 = 46.80
 														-- (13 000 - 11 140) = 1 860 * 0.01 = 18.60
 														-- Один процент от оставшейся набрать температуры
@@ -88,115 +192,53 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 		if tDelta < 0 then
 			outFlow = (rInfo("generationRate") + (rInfo("generationRate") * 0.01) + 1)
 		else
+
+
+
+			if (tDelta > (onePercentLeft * 0.2)) then
+				if (tDelta > (onePercentLeft * 1)) then
+					if (tDelta > (onePercentLeft * 10)) then
+						outFlow = outFlow * 0.9
+					else
+						outFlow = outFlow * 0.99					
+					end
+				else
+					outFlow = outFlow * 0.999
+				end
 			
-			if (tDelta > onePercentLeft * 0.1) then
-				outFlow = outFlow * 0.999
-			
-			
-			Я тут, температура растет крайне медленно
-			
-			
-			
-			
-			elseif(tDelta < onePercentLeft * 0.05) then
-				outFlow = outFlow + (outFlow * 0.001)
 			end
-			
-			
-			
-			--[[
-			if     (tDelta < (onePercentLeft * 0.01)) then
-				outFlow = outFlow + (outFlow * 0.01)
-			elseif (tDelta < (onePercentLeft * 0.1)) then
-				outFlow = outFlow + (outFlow * 0.1)
-			elseif (tDelta < (onePercentLeft * 1)) then
-				outFlow = outFlow + (outFlow * 1)
-			elseif (tDelta < (onePercentLeft * 10)) then
-				outFlow = outFlow + (outFlow * 10)
-			
-			elseif (tDelta > (onePercentLeft * 1)) then
-				outFlow = outFlow * 0.9
-			elseif (tDelta > (onePercentLeft * 0.1)) then
-				outFlow = outFlow * 0.99
-			elseif (tDelta > (onePercentLeft * 0.01)) then
-				outFlow = outFlow * 0.999
-			elseif (tDelta > (onePercentLeft * 0.001)) then
-				outFlow = outFlow * 0.9999
-			end
-			
-			
-			]]--
-		end
-		--[[
-		if ((tempMax * 0.5) > tCurrent) then
-			multy = 0.1
-			
-		elseif ((tempMax * 0.8) > tCurrent) then
-			multy = 1
-		
-		elseif ((tempMax * 0.9) < tCurrent) then
-			multy = 10
-		
-		else
-			-- multy = 1
-		end
-			
-			
-		if (tDelta < ((tempMax / 100)/(20 * multy))) then	-- 20	меньше 1 градуса в сек
-			-- outFlow = (rInfo("generationRate") + (rInfo("generationRate") * (1 - (tCurrent / tempMax))) + 1)		
-			outFlow = (rInfo("generationRate") * (tempMax / tCurrent) + 1)		
-		else--if (tDelta > ((tempMax / 100)/(15 * multy))) then -- 50 больше 2 градусов в сек
-			outFlow = (outFlow * 0.99999)
-			
-		
-		
-		
-		
-		
 		
 
 
-				-- 13000-7000/20 = 300
-		-- if ((rInfo("maxEnergySaturation") * 0.001) > rInfo("energySaturation")) then	-- Если сатурация больше 4% - работаем  0.01%
-			-- outFlow = outFlow * 0.98
-		-- else
-		-- if (tDelta < ((tempMax - tCurrent) / 100)) then -- 50
-		-- надо ввести динамический множитель
+
 		
-		
-			if (tDelta < ((tempMax / 100)/20)) then	-- 20				--then -- 50
-				-- fluxOutGate.setFlowOverride(rInfo("generationRate") * (tempMax / tCurrent) + 1)		-- СТАРАЯ ВЕРСИЯ
-				outFlow =(outFlow + (rInfo("generationRate") * (1 - (tCurrent / tempMax))) + 1)		
-				-- fluxOutGate.setFlowOverride((rInfo("generationRate") * (tempMax / tCurrent)) + ((tempMax - tCurrent) /10 ))	-- РОСТ МОЖЕТ БЫТЬ СЛИШКОМ БЫСТРЫЙ	
-				-- if 
+			if (tDelta < (onePercentLeft * 0.1)) then
+				if (tDelta < (onePercentLeft * 0.05)) then
+					if(tDelta < (onePercentLeft * 0.01)) then
+						outFlow = outFlow + (outFlow * 0.01) + 1
+					else
+						outFlow = outFlow + (outFlow * 0.05) + 1
+					end
+				else
+					outFlow = outFlow + (outFlow * 0.1) + 1
+				end
 				
-				
-				
-			
-			elseif (tDelta > ((tempMax / 100)/18)) then -- 50
-				outFlow =(rInfo("generationRate") * 0.99999)
-			
-			
-					--13000-7000/50 = 120
-			-- 2500 / 13000 = 0,1923076923076923
-			-- (rInfo("generationRate") + (rInfo("generationRate") * (1 - (tCurrent / tempMax))) +1)
-			-- (rInfo("generationRate") + (rInfo("generationRate") * (1 - (tCurrent / tempMax))) +1)
-			
-			-- elseif (tDelta > ((tempMax - tCurrent) / 90)) then	 --40
-				-- fluxOutGate.setFlowOverride(rInfo("generationRate") * 0.99)
-			
-			
-			-- elseif (tDelta > ((tempMax - tCurrent) / 80)) then	 --40
-				-- fluxOutGate.setFlowOverride(rInfo("generationRate"))
 			end
-		-- end
-		
+			
+			
+			
 		end
-		]]--
+		
+	
 		
 		
 		
 		fluxOutGate.setFlowOverride(outFlow)
+		
+		
+		
+		--]]
+		
 		
     end
     print("Реактор разогрет до ", rInfo("temperature"))
