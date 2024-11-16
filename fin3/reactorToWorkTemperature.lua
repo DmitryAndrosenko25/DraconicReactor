@@ -75,6 +75,7 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 	local pulty = 1
 	-- local onePercentLeft = nil
 	-- local tempSpeed = nil
+	local up = 1
 	
 	local extraStop1 = true
 	local extraStop2 = true
@@ -112,14 +113,32 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 			-- fluxOutGate.setFlowOverride(rInfo("generationRate"))
 		-- end 
 		
-		
-		if (tDelta < ((tempMax - tCurrent) / 350)) then -- 200!!!!
+		if (tDelta < ((tempMax - tCurrent) / 200)) then -- 200!!!!
 			-- Это почти идеал!!!!!!!!!!!
 			
-			fluxOutGate.setFlowOverride((rInfo("generationRate") * (tempMax / tCurrent)) + ((tempMax - tCurrent) /5 ))	-- 10!!! РОСТ МОЖЕТ БЫТЬ СЛИШКОМ БЫСТРЫЙ	
-		elseif (tDelta > ((tempMax - tCurrent) / 100)) then	 --40
-			fluxOutGate.setFlowOverride(rInfo("generationRate"))
+			-- fluxOutGate.setFlowOverride((rInfo("generationRate") * (tempMax / tCurrent)) + ((tempMax - tCurrent) + up ))	-- /10!!! РОСТ МОЖЕТ БЫТЬ СЛИШКОМ БЫСТРЫЙ	
+			-- local del = (rInfo("energySaturation") / rInfo("maxEnergySaturation")) * 3
+			
+			local saturat = rInfo("maxEnergySaturation") - (rInfo("maxEnergySaturation") - rInfo("energySaturation"))
+			-- fluxOutGate.setFlowOverride((rInfo("generationRate") * ((tempMax / tCurrent) + (rInfo("energySaturation") / rInfo("maxEnergySaturation")))) + 1) -- (rInfo("generationRate") * del))	-- /10!!! РОСТ МОЖЕТ БЫТЬ СЛИШКОМ БЫСТРЫЙ	
+			fluxOutGate.setFlowOverride(((rInfo("generationRate") * (tempMax / tCurrent)) + ((saturat /20) /200)) + 1) -- (rInfo("generationRate") * del))	-- /10!!! РОСТ МОЖЕТ БЫТЬ СЛИШКОМ БЫСТРЫЙ	
+			-- up = up + 1
+		
+		
+		-- elseif (tDelta > ((tempMax - tCurrent) / 100)) then	 --40
+			-- fluxOutGate.setFlowOverride(1)
+		
+		-- elseif (tDelta > ((tempMax - tCurrent) / 140)) then	 --40
+			-- fluxOutGate.setFlowOverride(rInfo("generationRate"))
+			up = 1
+		
+		-- elseif (tDelta > ((tempMax - tCurrent) / 180)) then	 --40
+			-- fluxOutGate.setFlowOverride(fluxOutGate.getFlow.getFlow() * 0.9)
+		else
+			fluxOutGate.setFlowOverride(rInfo("generationRate") + 1)
+		
 		end
+		
 		--==================================================================================
 		--[[
 		if (((rInfo("maxEnergySaturation") * 0.5 ) > rInfo("energySaturation")) and extraStop) then -- Экстренный стопкран
