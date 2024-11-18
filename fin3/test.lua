@@ -2,6 +2,7 @@ local component = require("component")
 local reactorInit = require("reactorInit")
 local reactorUpTo2000 = require("reactorUpTo2000")
 local reactorToWorkTemperature = require("reactorToWorkTemperature")
+local mainProcess = require("mainProcess")
 -- local shield = require("shield")
 
 local a = reactorInit.getGatesAddresses() -- Получаем адреса по порядку: 1 реактор, 2 гейт вход, 3 гейт выход
@@ -42,3 +43,9 @@ end
 
 
 reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fluxOutAddress, tempMAX)
+
+mainProcess.reactorInit(reactorAddress, fluxInAddress, fluxOutAddress, 2) 	
+																								-- reactorMode - может принимать три валидных значения:
+																								-- 1 - самая оптимальная температура в 8000 градусов
+																								-- 2 - самая "экстремальная" температура в 13000 градусов
+																								-- 3 - баланс выход энергии равно входу

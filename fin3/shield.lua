@@ -4,7 +4,7 @@ local shield = {}
 local component = require("component")
 local shieldreactor = nil
 local shieldfluxIn = nil
-local myLevel = nil
+local myLevel = 1.3
 local isRunExtreme = false
 local isRun = false
 
