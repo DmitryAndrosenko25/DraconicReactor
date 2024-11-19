@@ -27,13 +27,29 @@ end
 local function main(temerature)
 	local tMax = temerature
 	
+	
+	
+	--[[
 	print("Начинаются попытки установки экстремального щита")
 	local coroutineShieldExtrm = coroutine.create(shield.runShieldExtreme)	 --/ запуск щита
 	coroutine.resume(coroutineShieldExtrm) -- Выведет "Начало корутины"		--/
 	print("Попытки установки экстремального щита закончены")
 	
-	local up = 0
-	local down = 0
+	--]]
+	--===================================================================================
+	print("Начинаются попытки установки безопасного щита")
+	shield.setReactor(reactorAddress, fluxInAddress)	--\
+	shield.setLevel(1.5)												 --\ ~33% щита
+	local coroutineShield = coroutine.create(shield.runShield)		 	 --/ запуск щита
+	coroutine.resume(coroutineShield) -- Выведет "Начало корутины"		--/
+	print("Попытки установки безопасного щита закончены")
+	--===================================================================================
+	
+	
+	
+	
+	local up = 1
+	local down = 1
 		
 	local isRunning = true
 	
@@ -44,39 +60,94 @@ local function main(temerature)
 	
 	
 	-- local isNeedUp = true
-	-- local tmp = 0
+	local multy = 0
 	
 	while isRunning do
-		coroutine.resume(coroutineShieldExtrm)
+		-- coroutine.resume(coroutineShieldExtrm)
+		coroutine.resume(coroutineShield)
+		
+		
+		
+		
 		tCurrent = rInfo("temperature")
-		-- outFlow = fluxOut.getFlow()
+		outFlow = fluxOut.getFlow()
 		tStart = rInfo("temperature")
         os.sleep(0.05)
         tEnd = rInfo("temperature")
+		
+		if (tMax - tCurrent) > 0.01 then
+			-- 13000 - 12987.01 = 12,99
+		
+			-- start = 12987.01	start - end = 17.01
+			-- end   = 12980.00
+			
+			if (tStart - tEnd) > 0.01 then
+				
+				print("((tStart - tEnd)/1000) = ".. ((tStart - tEnd)/1000))					-- это в принципе работает, но делитель нужно подобрать, так как температура всеравно падает
+				fluxOut.setFlowOverride(outFlow * (1 + ((tStart - tEnd)/1000)))
+			end	
+			
+			
+			
+			-- print("((tMax - tCurrent)/100) = ".. ((tMax - tCurrent)/1000))
+			-- fluxOut.setFlowOverride(outFlow * (1 + ((tMax - tCurrent)/1000)))
+		
+		
+		end
+		
+		--[[
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		if tMax > tCurrent then
 			
+			
+			
+			
+			
+			
 			if (tMax - tCurrent) > 0.01 then
-				if (tEnd > tStart) then
-					up = up + 1 * ((tEnd - tStart) / 0.01)				
+				if (tEnd < tStart) then
+					
+					
+					
+					up = up + 10 * ((tStart - tEnd) / 0.01)
+					fluxOut.setFlowOverride(outFlow + (1 * up))
+					
+					
+					-- up = up + (100 * ((tStart - tEnd) / 0.01))				
+					-- fluxOut.setFlowOverride(outFlow + up)
+					print (up .. " up - temerature: " ..tEnd)			-- ВСЕ РАВНО СЛИШКОМ БЫСТРО ПАДАЕТ ТЕМПЕРАТУРА. В СТРОКЕ 60 НУЖНО УВЕЛИЧИТЬ МНОЖИТЕЛЬ!!!!!
 				end
 			end
-			
-			fluxOut.setFlowOverride(outFlow + up)
-			print (up .. " up - temerature: " ..tEnd)			-- ВСЕ РАВНО СЛИШКОМ БЫСТРО ПАДАЕТ ТЕМПЕРАТУРА. В СТРОКЕ 60 НУЖНО УВЕЛИЧИТЬ МНОЖИТЕЛЬ!!!!!
-			down = 0
+			down = 1
 			
 			
 		elseif tCurrent > tMax then
 			
 			if (tCurrent - tMax) > 0.01 then				
 				if (tStart > tEnd) then
-					down = down + 1 * ((tStart - tEnd) / 0.01)		
+					down = down + (1 * ((tStart - tEnd) / 0.01))		
 					print (down .. " down - temperature: " ..tEnd)
 				end
 			end	
 			fluxOut.setFlowOverride(outFlow - down)
-			up = 0		
+			up = 1		
 		end
+		--]]
+		
 		-- Остановка реактора при 90% конвертации - но ЛУЧШЕ при 80-85%
 		if ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 100) >= 90 then --95 then-- 95% (--97% = BOOM!!!)
 			reactor.stopReactor()
