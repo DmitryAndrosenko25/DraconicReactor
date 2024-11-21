@@ -81,11 +81,11 @@ local function main(temerature)
 				
 				
 				if (tEnd - tStart) > 1 then						-- Если рост слишком быстрый?????
-					up = up - (1 * ((tEnd - tStart)* 75)) --50
+					up = up - (1 * ((tEnd - tStart)* 20)) --75
 				elseif (tEnd - tStart) > 0.1 then
-					up = up - (1 * ((tEnd - tStart)* 50)) --50
+					up = up - (1 * ((tEnd - tStart)* 10)) --30 --50
 				elseif (tEnd - tStart) > 0.01 then
-					up = up - (1 * ((tEnd - tStart)* 25)) --50
+					up = up - (1 * ((tEnd - tStart)* 5)) --15 --25
 				else
 					up = up + 1
 				end
@@ -101,18 +101,27 @@ local function main(temerature)
 					down = down - (1 * ((tStart - tEnd) * 500000))
 				elseif (tStart - tEnd) > 1 then
 					down = down - (1 * ((tStart - tEnd) * 50000))
+				
+				
+				
+				тут нужно добавить переменную которая  тормозит набор скорости МОЖЕТ ДАЖЕ СООТНОШЕНИЕМ МАКС САТУРАЦИИ К САТУРАЦИИ??????????
+				
+				
+				
+				
+				
 				elseif (tStart - tEnd) > 0.5 then
 					down = down - (1 * ((tStart - tEnd) * 5000))
 				elseif (tStart - tEnd) > 0.1 then
-					down = down - (1 * ((tStart - tEnd) * 1000)) --500
+					down = down - (1 * ((tStart - tEnd) * 1500)) -- 1000--500
 				elseif (tStart - tEnd) > 0.05 then
-					down = down - (1 * ((tStart - tEnd) * 500)) --300 
-				elseif (tStart - tEnd) > 0.03 then
-					down = down - (1 * ((tStart - tEnd) * 300)) --150
+					down = down - (1 * ((tStart - tEnd) * 750)) -- 500--300 
+				elseif (tStart - tEnd) > 0.03 then				
+					down = down - (1 * ((tStart - tEnd) * 450)) -- 300 --150
 				elseif (tStart - tEnd) > 0.02 then
-					down = down - (1 * ((tStart - tEnd) * 200))	--100				-- ИЛИ ТУТ ЕЩЕ ДОБАВИТЬ ЕЛС ИФ ГРАДАЦИЮ 0.05, 0.03, 0.02....
+					down = down - (1 * ((tStart - tEnd) * 300))	--100				-- ИЛИ ТУТ ЕЩЕ ДОБАВИТЬ ЕЛС ИФ ГРАДАЦИЮ 0.05, 0.03, 0.02....
 				elseif (tStart - tEnd) > 0.01 then								-- 100  НУЖНО ПОПРОБОВАТЬ 100 - ТАК КАК ПРИ ТЕСТИРОВАНИИ 13 000 ГРАДУСОВ СКАКАЛО В ПРЕДЕЛАХ 0.1 ГРАДУСА
-					down = down - (1 * ((tStart - tEnd) * 100)) --50					
+					down = down - (1 * ((tStart - tEnd) * 150)) --50					
 				else
 					down = down + 1
 				end
@@ -120,7 +129,7 @@ local function main(temerature)
 			fluxOut.setFlowOverride(rInfo("generationRate") - down)
 		else
 			fluxOut.setFlowOverride(rInfo("generationRate"))
-			down = down * 0.95
+			-- down = down * 0.95
 			up = 0
 		end
 		
