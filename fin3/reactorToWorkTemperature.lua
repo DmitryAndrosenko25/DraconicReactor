@@ -65,6 +65,9 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 	local tCurrent = rInfo("temperature")
 	local tEnd = nil
 	local tDelta = nil
+	
+	local correction = 0
+	
 	while tCurrent <= (tempMax) do 
 		coroutine.resume(coroutineShield)
 		tCurrent = rInfo("temperature")
@@ -73,7 +76,13 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
         tDelta = (tEnd - tCurrent)		
 		if (tDelta < ((tempMax - tCurrent) / 200)) then -- 200!!!!
 			local saturat = rInfo("maxEnergySaturation") - (rInfo("maxEnergySaturation") - rInfo("energySaturation"))			
-			fluxOutGate.setFlowOverride(((rInfo("generationRate") * (tempMax / tCurrent)) + ((saturat /20) /100)) + 1) 
+			-- fluxOutGate.setFlowOverride(((rInfo("generationRate") * (tempMax / tCurrent)) + ((saturat /20) /100)) + 1)
+			
+			correction = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) / 150  -- 150 ТАК САБЕ РАБОТАЕТ
+			
+			Я ТУТ!!!!!
+			
+			fluxOutGate.setFlowOverride((((rInfo("generationRate") * (tempMax / tCurrent)) + ((saturat /20) /100)) * (1 - correction)) + 1) 
 		else
 			fluxOutGate.setFlowOverride(rInfo("generationRate") + 1)		
 		end
@@ -83,3 +92,18 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 end
 
 return reactorToWorkTemperature
+
+
+	-- ((rInfo("maxFuelConversion") - rInfo("fuelConversion")) / rInfo("maxFuelConversion"))
+	
+	-- тут нужно добавить переменную которая в самом конце разогрева тормозит набор скорости МОЖЕТ ДАЖЕ СООТНОШЕНИЕМ МАКС САТУРАЦИИ К САТУРАЦИИ??????????
+	-- rInfo("fuelConversion"))
+-- print("maxFuelConversion " .. "__________" .. rInfo("maxFuelConversion"))
+		-- 0								10 000
+	
+											-- 1.0 - ~ 0.02									
+									-- 
+									
+									
+									-- ((rInfo("maxFuelConversion") - rInfo("fuelConversion")) / rInfo("maxFuelConversion"))
+	

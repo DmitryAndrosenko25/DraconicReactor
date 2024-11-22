@@ -75,19 +75,20 @@ local function main(temerature)
         os.sleep(0.05)
         tEnd = rInfo("temperature")
 		
+		multy = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) / 175
 		
 		if tMax > tCurrent then
 			if (tMax - tCurrent) > 0.01 then
 				
 				
 				if (tEnd - tStart) > 1 then						-- Если рост слишком быстрый?????
-					up = up - (1 * ((tEnd - tStart)* 20)) --75
+					up = up - (((1 - multy) * ((tEnd - tStart)* 20))) --75
 				elseif (tEnd - tStart) > 0.1 then
-					up = up - (1 * ((tEnd - tStart)* 10)) --30 --50
+					up = up - (((1 - multy) * ((tEnd - tStart)* 10)))--30 --50
 				elseif (tEnd - tStart) > 0.01 then
-					up = up - (1 * ((tEnd - tStart)* 5)) --15 --25
+					up = up - (((1 - multy) * ((tEnd - tStart)* 5))) --15 --25
 				else
-					up = up + 1
+					up = up + (1 - multy)
 				end
 			end
 			fluxOut.setFlowOverride(rInfo("generationRate") + up)
@@ -96,34 +97,37 @@ local function main(temerature)
 			if (tCurrent - tMax) > 0.01 then
 				
 				if (tStart - tEnd) > 100 then							-- Если падение слишком быстрое???
-					down = down - (1 * ((tStart - tEnd) * 5000000))
+					down = down - ((1 + multy) * ((tStart - tEnd) * 5000000))
 				elseif (tStart - tEnd) > 10 then
-					down = down - (1 * ((tStart - tEnd) * 500000))
+					down = down - ((1 + multy) * ((tStart - tEnd) * 500000))
 				elseif (tStart - tEnd) > 1 then
-					down = down - (1 * ((tStart - tEnd) * 50000))
+					down = down - ((1 + multy) * ((tStart - tEnd) * 50000))
 				
 				
 				
-				тут нужно добавить переменную которая  тормозит набор скорости МОЖЕТ ДАЖЕ СООТНОШЕНИЕМ МАКС САТУРАЦИИ К САТУРАЦИИ??????????
+				-- тут нужно добавить переменную которая  тормозит набор скорости МОЖЕТ ДАЖЕ СООТНОШЕНИЕМ МАКС САТУРАЦИИ К САТУРАЦИИ??????????
+				-- ((rInfo("maxFuelConversion") - rInfo("fuelConversion")) / rInfo("maxFuelConversion"))
+				-- correction = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) / 175 -- 150 ТАК САБЕ РАБОТАЕТ		
+			-- fluxOutGate.setFlowOverride((((rInfo("generationRate") * (tempMax / tCurrent)) + ((saturat /20) /100)) * (1 - correction)) + 1) 
 				
 				
 				
 				
 				
 				elseif (tStart - tEnd) > 0.5 then
-					down = down - (1 * ((tStart - tEnd) * 5000))
+					down = down + ((1 + multy) * ((tStart - tEnd) * 500))
 				elseif (tStart - tEnd) > 0.1 then
-					down = down - (1 * ((tStart - tEnd) * 1500)) -- 1000--500
+					down = down + ((1 + multy) * ((tStart - tEnd) * 100)) -- 1000--500
 				elseif (tStart - tEnd) > 0.05 then
-					down = down - (1 * ((tStart - tEnd) * 750)) -- 500--300 
+					down = down + ((1 + multy) * ((tStart - tEnd) * 50)) -- 500--300 
 				elseif (tStart - tEnd) > 0.03 then				
-					down = down - (1 * ((tStart - tEnd) * 450)) -- 300 --150
+					down = down + ((1 + multy) * ((tStart - tEnd) * 30)) -- 300 --150
 				elseif (tStart - tEnd) > 0.02 then
-					down = down - (1 * ((tStart - tEnd) * 300))	--100				-- ИЛИ ТУТ ЕЩЕ ДОБАВИТЬ ЕЛС ИФ ГРАДАЦИЮ 0.05, 0.03, 0.02....
+					down = down + ((1 + multy) * ((tStart - tEnd) * 20))	--100				-- ИЛИ ТУТ ЕЩЕ ДОБАВИТЬ ЕЛС ИФ ГРАДАЦИЮ 0.05, 0.03, 0.02....
 				elseif (tStart - tEnd) > 0.01 then								-- 100  НУЖНО ПОПРОБОВАТЬ 100 - ТАК КАК ПРИ ТЕСТИРОВАНИИ 13 000 ГРАДУСОВ СКАКАЛО В ПРЕДЕЛАХ 0.1 ГРАДУСА
-					down = down - (1 * ((tStart - tEnd) * 150)) --50					
+					down = down + ((1 + multy) * ((tStart - tEnd) * 10))			 --50					
 				else
-					down = down + 1
+					down = down + (1 + multy)
 				end
 			end	
 			fluxOut.setFlowOverride(rInfo("generationRate") - down)
@@ -147,114 +151,75 @@ local function main(temerature)
 		
 		
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		--[[
-		
-		if (tMax - tCurrent) > 0.01 then
-			-- 13000 - 12987.01 = 12,99
-		
-			-- start = 12987.01	start - end = 17.01
-			-- end   = 12980.00
-			
-			if (tStart - tEnd) > 0.01 then
-				
-				if (tMax - tCurrent) > 1 then
-					print("((tStart - tEnd)/100) = ".. ((tStart - tEnd)/100))		--1000			-- это в принципе работает, но делитель нужно подобрать, так как температура всеравно падает
-					fluxOut.setFlowOverride(outFlow * (1 + ((tStart - tEnd)/100)))
-				elseif (tMax - tCurrent) > 0.1 then
-					print("((tStart - tEnd)/300) = ".. ((tStart - tEnd)/250))		--1000			-- это в принципе работает, но делитель нужно подобрать, так как температура всеравно падает
-					fluxOut.setFlowOverride(outFlow * (1 + ((tStart - tEnd)/250)))
-				else
-					print("((tStart - tEnd)/150) = ".. ((tStart - tEnd)/300))		--1000			-- это в принципе работает, но делитель нужно подобрать, так как температура всеравно падает
-					fluxOut.setFlowOverride(outFlow * (1 + ((tStart - tEnd)/300)))
-				end
-			end	
-			
-			-- print("((tMax - tCurrent)/100) = ".. ((tMax - tCurrent)/1000))
-			-- fluxOut.setFlowOverride(outFlow * (1 + ((tMax - tCurrent)/1000)))
-		
-		elseif (tCurrent - tMax) > 0.01 then
-			
-			if (tStart - tEnd) > 0.01 then
-				
-				print("((tStart - tEnd)/1500) = ".. ((tStart - tEnd)/1500))		--1000		ДИКИЙ РОСТ!!!!!!	-- это в принципе работает, но делитель нужно подобрать, так как температура всеравно падает
-				fluxOut.setFlowOverride(outFlow * (1 - ((tStart - tEnd)/1500)))
-			end
-		
-		
-		
-		
-		else
-			fluxOut.setFlowOverride(rInfo("generationRate"))
-		
-		end
-		--]]
-		--[[
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		
 		
 		if tMax > tCurrent then
-			
-			
-			
-			
-			
-			
 			if (tMax - tCurrent) > 0.01 then
-				if (tEnd < tStart) then
-					
-					
-					
-					up = up + 10 * ((tStart - tEnd) / 0.01)
-					fluxOut.setFlowOverride(outFlow + (1 * up))
-					
-					
-					-- up = up + (100 * ((tStart - tEnd) / 0.01))				
-					-- fluxOut.setFlowOverride(outFlow + up)
-					print (up .. " up - temerature: " ..tEnd)			-- ВСЕ РАВНО СЛИШКОМ БЫСТРО ПАДАЕТ ТЕМПЕРАТУРА. В СТРОКЕ 60 НУЖНО УВЕЛИЧИТЬ МНОЖИТЕЛЬ!!!!!
+				
+				
+				if (tEnd - tStart) > 1 then						-- Если рост слишком быстрый?????
+					up = up - ((1 * ((tEnd - tStart)* 20)) * ((rInfo("maxFuelConversion") - rInfo("fuelConversion")) / rInfo("maxFuelConversion"))) --75
+				elseif (tEnd - tStart) > 0.1 then
+					up = up - ((1 * ((tEnd - tStart)* 10)) * ((rInfo("maxFuelConversion") - rInfo("fuelConversion")) / rInfo("maxFuelConversion")))--30 --50
+				elseif (tEnd - tStart) > 0.01 then
+					up = up - ((1 * ((tEnd - tStart)* 5)) * ((rInfo("maxFuelConversion") - rInfo("fuelConversion")) / rInfo("maxFuelConversion"))) --15 --25
+				else
+					up = up + 1
 				end
 			end
-			down = 1
-			
-			
+			fluxOut.setFlowOverride(rInfo("generationRate") + up)
+		
 		elseif tCurrent > tMax then
-			
-			if (tCurrent - tMax) > 0.01 then				
-				if (tStart > tEnd) then
-					down = down + (1 * ((tStart - tEnd) / 0.01))		
-					print (down .. " down - temperature: " ..tEnd)
+			if (tCurrent - tMax) > 0.01 then
+				
+				if (tStart - tEnd) > 100 then							-- Если падение слишком быстрое???
+					down = down - (1 * ((tStart - tEnd) * 5000000))
+				elseif (tStart - tEnd) > 10 then
+					down = down - (1 * ((tStart - tEnd) * 500000))
+				elseif (tStart - tEnd) > 1 then
+					down = down - (1 * ((tStart - tEnd) * 50000))
+				
+				
+				
+				-- тут нужно добавить переменную которая  тормозит набор скорости МОЖЕТ ДАЖЕ СООТНОШЕНИЕМ МАКС САТУРАЦИИ К САТУРАЦИИ??????????
+				-- ((rInfo("maxFuelConversion") - rInfo("fuelConversion")) / rInfo("maxFuelConversion"))
+				
+				
+				
+				
+				elseif (tStart - tEnd) > 0.5 then
+					down = down - (1 * ((tStart - tEnd) * 5000))
+				elseif (tStart - tEnd) > 0.1 then
+					down = down - (1 * ((tStart - tEnd) * 1500)) -- 1000--500
+				elseif (tStart - tEnd) > 0.05 then
+					down = down - (1 * ((tStart - tEnd) * 750)) -- 500--300 
+				elseif (tStart - tEnd) > 0.03 then				
+					down = down - (1 * ((tStart - tEnd) * 450)) -- 300 --150
+				elseif (tStart - tEnd) > 0.02 then
+					down = down - (1 * ((tStart - tEnd) * 300))	--100				-- ИЛИ ТУТ ЕЩЕ ДОБАВИТЬ ЕЛС ИФ ГРАДАЦИЮ 0.05, 0.03, 0.02....
+				elseif (tStart - tEnd) > 0.01 then								-- 100  НУЖНО ПОПРОБОВАТЬ 100 - ТАК КАК ПРИ ТЕСТИРОВАНИИ 13 000 ГРАДУСОВ СКАКАЛО В ПРЕДЕЛАХ 0.1 ГРАДУСА
+					down = down - (1 * ((tStart - tEnd) * 150))			 --50					
+				else
+					down = down + 1
 				end
 			end	
-			fluxOut.setFlowOverride(outFlow - down)
-			up = 1		
-		end
+			fluxOut.setFlowOverride(rInfo("generationRate") - down)
+		
+		
 		--]]
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		-- Остановка реактора при 90% конвертации - но ЛУЧШЕ при 80-85%
 		if ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 100) >= 90 then --95 then-- 95% (--97% = BOOM!!!)
