@@ -58,9 +58,7 @@ local function main(temerature)
 	local tStart = rInfo("temperature")
 	local tEnd = rInfo("temperature")
 	
-	
-	-- local isNeedUp = true
-	local multy = 0
+	-- local multy = 0
 	
 	while isRunning do
 		-- coroutine.resume(coroutineShieldExtrm)
@@ -75,22 +73,57 @@ local function main(temerature)
         os.sleep(0.05)
         tEnd = rInfo("temperature")
 		
-		multy = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) / 175
+		if (tCurrent < tMax) and (tStart - tEnd) > 0.01 then
+			
+			
+			
+			Я тут!!!!!!!!!!!
+			
+			
+			
+			fluxOut.setFlowOverride(outFlow * (1 + ((tCurrent - tMax) / 1000)))
 		
+		elseif (tMax > tCurrent) and (tMax - tCurrent) > 0.01 then
+			fluxOut.setFlowOverride(outFlow * (1 - ((tCurrent - tMax) / 1000)))
+		
+		end
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		-- multy = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) / 150 --100 --175
+		
+		
+		
+		--[[
+		Последняя рабочая версия
 		if tMax > tCurrent then
 			if (tMax - tCurrent) > 0.01 then
 				
 				
 				if (tEnd - tStart) > 1 then						-- Если рост слишком быстрый?????
-					up = up - (((1 - multy) * ((tEnd - tStart)* 20))) --75
+					up = up - (((1 + multy) * ((tEnd - tStart))))--* 20))) --75
 				elseif (tEnd - tStart) > 0.1 then
-					up = up - (((1 - multy) * ((tEnd - tStart)* 10)))--30 --50
+					up = up - (((1 + multy) * ((tEnd - tStart))))--* 10)))--30 --50
 				elseif (tEnd - tStart) > 0.01 then
-					up = up - (((1 - multy) * ((tEnd - tStart)* 5))) --15 --25
+					up = up - (((1 + multy) * ((tEnd - tStart))))				--* 5))) --15 --25
 				else
-					up = up + (1 - multy)
+					-- up = up + (1 + multy)
+					up = up + (1 + multy)
 				end
 			end
+			
 			fluxOut.setFlowOverride(rInfo("generationRate") + up)
 		
 		elseif tCurrent > tMax then
@@ -112,20 +145,28 @@ local function main(temerature)
 				
 				
 				
-				
+				elseif (tStart - tEnd) > 0.7 then
+					down = down + ((1 + multy) * ((tStart - tEnd) * 240))
 				
 				elseif (tStart - tEnd) > 0.5 then
-					down = down + ((1 + multy) * ((tStart - tEnd) * 500))
+					down = down + ((1 + multy) * ((tStart - tEnd) * 220))
 				elseif (tStart - tEnd) > 0.1 then
-					down = down + ((1 + multy) * ((tStart - tEnd) * 100)) -- 1000--500
+					down = down + ((1 + multy) * ((tStart - tEnd) * 200))--100 -- 1000--500
+				elseif (tStart - tEnd) > 0.07 then
+					down = down + ((1 + multy) * ((tStart - tEnd) * 180))--50 -- 500--300 
+				elseif (tStart - tEnd) > 0.06 then
+					down = down + ((1 + multy) * ((tStart - tEnd) * 160))--50 -- 500--300 	
+				
 				elseif (tStart - tEnd) > 0.05 then
-					down = down + ((1 + multy) * ((tStart - tEnd) * 50)) -- 500--300 
+					down = down + ((1 + multy) * ((tStart - tEnd) * 140))--50 -- 500--300 
+				elseif (tStart - tEnd) > 0.04 then
+					down = down + ((1 + multy) * ((tStart - tEnd) * 120))--50 -- 500--300 
 				elseif (tStart - tEnd) > 0.03 then				
-					down = down + ((1 + multy) * ((tStart - tEnd) * 30)) -- 300 --150
+					down = down + ((1 + multy) * ((tStart - tEnd) * 100))--30 -- 300 --150
 				elseif (tStart - tEnd) > 0.02 then
-					down = down + ((1 + multy) * ((tStart - tEnd) * 20))	--100				-- ИЛИ ТУТ ЕЩЕ ДОБАВИТЬ ЕЛС ИФ ГРАДАЦИЮ 0.05, 0.03, 0.02....
+					down = down + ((1 + multy) * ((tStart - tEnd) * 80))--20	--100				-- ИЛИ ТУТ ЕЩЕ ДОБАВИТЬ ЕЛС ИФ ГРАДАЦИЮ 0.05, 0.03, 0.02....
 				elseif (tStart - tEnd) > 0.01 then								-- 100  НУЖНО ПОПРОБОВАТЬ 100 - ТАК КАК ПРИ ТЕСТИРОВАНИИ 13 000 ГРАДУСОВ СКАКАЛО В ПРЕДЕЛАХ 0.1 ГРАДУСА
-					down = down + ((1 + multy) * ((tStart - tEnd) * 10))			 --50					
+					down = down + ((1 + multy) * ((tStart - tEnd) * 40)) --10			 --50					
 				else
 					down = down + (1 + multy)
 				end
@@ -133,27 +174,18 @@ local function main(temerature)
 			fluxOut.setFlowOverride(rInfo("generationRate") - down)
 		else
 			fluxOut.setFlowOverride(rInfo("generationRate"))
-			-- down = down * 0.95
+			down = down * 0.95-- * multy--095
 			up = 0
 		end
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+		--]]
 		
 		
 		
 		
 		--[[
 		
-		
+		Предыдущий ПРЕДПОСЛЕДНИЙ вариант который вроде бы работал
 		if tMax > tCurrent then
 			if (tMax - tCurrent) > 0.01 then
 				
@@ -214,15 +246,8 @@ local function main(temerature)
 		
 		
 		
-		
-		
-		
-		
-		
-		
-		
 		-- Остановка реактора при 90% конвертации - но ЛУЧШЕ при 80-85%
-		if ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 100) >= 90 then --95 then-- 95% (--97% = BOOM!!!)
+		if ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 100) >= 80 then --95 then-- 95% (--97% = BOOM!!!)
 			reactor.stopReactor()
 			print((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 100)
 			isRunning = false
