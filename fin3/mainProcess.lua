@@ -80,7 +80,14 @@ local function main(temerature)
 			elseif (tEnd - tStart) > 0.001 then
 				fluxOut.setFlowOverride((rInfo("generationRate")) + (rInfo("generationRate") * ((tMax - tEnd) / 700)))  --500 МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
 			end
-			
+		
+
+			При конвертации > 40% - температура прыгает +-0.1 примерно. так же при перезаходе к хуям все бахает, нужно чтото делать со щитом
+=====================================================================================================================================================
+
+
+
+		
 		elseif (tEnd - tMax) > 0.001 then
 			fluxOut.setFlowOverride((rInfo("generationRate")) - ((rInfo("generationRate") * (tEnd - tMax)) / 200))  --	500 Это супер множитель МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
 		else 
