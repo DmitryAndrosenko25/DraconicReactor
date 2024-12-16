@@ -51,6 +51,8 @@ local function main(temerature)
 	
 	local ifStable = false
 	local stableCount = 0
+	local a = 0
+	local b = 0
 	
 	while isRunning do
 		
@@ -74,22 +76,32 @@ local function main(temerature)
 			end
 		end
 		
+		
+		a = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 200 --		200	50		100					200!!!!!!!			100
+		b = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 50 --	100	200	50		100					200!!!!!!!			100
+		
 		if (tMax - tEnd) > 0.001 then			
 			if (tStart > tEnd) then																		-- ЕСЛИ ТЕМПЕРАТУРА НИЖЕ НУЖНОЙ И ПРОДОЛЖАЕТ ПАДАТЬ
-				fluxOut.setFlowOverride(rInfo("generationRate") + (rInfo("generationRate") * 0.00005)) 	-- ТО РЕАЛЬНУЮ ГЕНЕРАЦИЮ УВЕЛИЧИВАЕМ НА 1%
+				
+								
+				fluxOut.setFlowOverride(rInfo("generationRate") + (rInfo("generationRate") * ((tMax - tEnd) / (100 + a)))) 	--	200		``500 ТО РЕАЛЬНУЮ ГЕНЕРАЦИЮ УВЕЛИЧИВАЕМ НА 1%
+				
+				-- fluxOut.setFlowOverride(rInfo("generationRate") + (rInfo("generationRate") * 0.00005)) 	-- ТО РЕАЛЬНУЮ ГЕНЕРАЦИЮ УВЕЛИЧИВАЕМ НА 1%
 			elseif (tEnd - tStart) > 0.001 then
-				fluxOut.setFlowOverride((rInfo("generationRate")) + (rInfo("generationRate") * ((tMax - tEnd) / 700)))  --500 МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
+				
+				
+				fluxOut.setFlowOverride((rInfo("generationRate")) + (rInfo("generationRate") * ((tMax - tEnd) / (200 + a))))   -- 300	400			700    500 МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
 			end
 		
-
+--[[
 			При конвертации > 40% - температура прыгает +-0.1 примерно. так же при перезаходе к хуям все бахает, нужно чтото делать со щитом
 =====================================================================================================================================================
-
+--]]
 
 
 		
 		elseif (tEnd - tMax) > 0.001 then
-			fluxOut.setFlowOverride((rInfo("generationRate")) - ((rInfo("generationRate") * (tEnd - tMax)) / 200))  --	500 Это супер множитель МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
+			fluxOut.setFlowOverride((rInfo("generationRate")) - ((rInfo("generationRate") * (tEnd - tMax)) / (150 + b)))  -- 	200				500 Это супер множитель МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
 		else 
 			fluxOut.setFlowOverride(rInfo("generationRate"))		
 		end

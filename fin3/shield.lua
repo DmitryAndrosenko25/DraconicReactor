@@ -51,10 +51,35 @@ function shield.runShieldExtreme()
 		--if (((reactorInfo("maxFieldStrength") / reactorInfo("fieldStrength")) *100) < 5) then 	-- ПРИ ТЕСТИРОВАНИИ 13000 ГРАДУСОВ ЩИТ ДЕРЖАЛСЯ В ПРЕДЕЛАХ 8.63%
 		
 		if ((reactorInfo("maxFieldStrength") * 0.01) <	reactorInfo("fieldStrength")) then --0.04
-			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 300)
+		
+		
+		
+		! Один процент это уже дохуя))))
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 600)
 		
 		else																			-- 0.04	-- ПРИ ТЕСТИРОВАНИИ 13000 ГРАДУСОВ ЩИТ ДЕРЖАЛСЯ В ПРЕДЕЛАХ 8.63%
-			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 600)	 			  		-- НУЖНО ДОБАВИТЬ АЛГОРИТМ ПОНИЖЕНИЯ В ТАКОМ СЛУЧАЕ ЩИТА ДО, НУ Я ХЗ... 5%
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 1200)	 			  		-- НУЖНО ДОБАВИТЬ АЛГОРИТМ ПОНИЖЕНИЯ В ТАКОМ СЛУЧАЕ ЩИТА ДО, НУ Я ХЗ... 5%
 		
 		
 		
