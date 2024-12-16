@@ -76,11 +76,7 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
         tDelta = (tEnd - tCurrent)		
 		if (tDelta < ((tempMax - tCurrent) / 200)) then -- 200!!!!
 			local saturat = rInfo("maxEnergySaturation") - (rInfo("maxEnergySaturation") - rInfo("energySaturation"))			
-			-- fluxOutGate.setFlowOverride(((rInfo("generationRate") * (tempMax / tCurrent)) + ((saturat /20) /100)) + 1)
-			
 			correction = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) / 200  -- 150 ТАК САБЕ РАБОТАЕТ
-			
-			
 			fluxOutGate.setFlowOverride((((rInfo("generationRate") * (tempMax / tCurrent)) + ((saturat /20) /100)) * (1 - correction)) + 1) 
 		else
 			fluxOutGate.setFlowOverride(rInfo("generationRate") + 1)		
@@ -91,18 +87,3 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 end
 
 return reactorToWorkTemperature
-
-
-	-- ((rInfo("maxFuelConversion") - rInfo("fuelConversion")) / rInfo("maxFuelConversion"))
-	
-	-- тут нужно добавить переменную которая в самом конце разогрева тормозит набор скорости МОЖЕТ ДАЖЕ СООТНОШЕНИЕМ МАКС САТУРАЦИИ К САТУРАЦИИ??????????
-	-- rInfo("fuelConversion"))
--- print("maxFuelConversion " .. "__________" .. rInfo("maxFuelConversion"))
-		-- 0								10 000
-	
-											-- 1.0 - ~ 0.02									
-									-- 
-									
-									
-									-- ((rInfo("maxFuelConversion") - rInfo("fuelConversion")) / rInfo("maxFuelConversion"))
-	
