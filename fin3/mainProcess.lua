@@ -63,12 +63,12 @@ local function main(temerature)
         tEnd = rInfo("temperature")
 		
 		
-		if math.abs(tMax - tEnd) > 10 then
+		if math.abs(tMax - tEnd) > 1 then --10
 			-- ifStable = false
 			coroutine.resume(coroutineShield)		
 			stableCount = 0
 		else
-			if stableCount > 100 then						-- ЕСЛИ ТЕМПЕРАТУРА СКАЧЕТ ОЧЕНЬ СИЛЬНО ТО ВКЛЮЧАЕМ БЕЗОПАСНЫЙ ЩИТ
+			if stableCount > 150 then			--100		-- ЕСЛИ ТЕМПЕРАТУРА СКАЧЕТ ОЧЕНЬ СИЛЬНО ТО ВКЛЮЧАЕМ БЕЗОПАСНЫЙ ЩИТ
 				coroutine.resume(coroutineShieldExtrm)		-- ПО ЛОГИКЕ ЕСЛИ ПРИМЕРНО 5 СЕКУНД, А ЭТО 100 ТИКОВ, ТЕМПЕРАТУРА В НОРМЕ ТО ВКЛЮЧАЕМ ЕКСТРИМ ЩИТ
 			else	
 				stableCount = stableCount + 1
@@ -77,20 +77,22 @@ local function main(temerature)
 		end
 		
 		
-		a = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 200 --		200	50		100					200!!!!!!!			100
-		b = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 50 --	100	200	50		100					200!!!!!!!			100
+		-- a = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 5000 --		200	50		100					200!!!!!!!			100
+		-- b = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 40 -- 50	100	200	50		100					200!!!!!!!			100
 		
 		if (tMax - tEnd) > 0.001 then			
 			if (tStart > tEnd) then																		-- ЕСЛИ ТЕМПЕРАТУРА НИЖЕ НУЖНОЙ И ПРОДОЛЖАЕТ ПАДАТЬ
 				
 								
-				fluxOut.setFlowOverride(rInfo("generationRate") + (rInfo("generationRate") * ((tMax - tEnd) / (100 + a)))) 	--	200		``500 ТО РЕАЛЬНУЮ ГЕНЕРАЦИЮ УВЕЛИЧИВАЕМ НА 1%
+				-- fluxOut.setFlowOverride(rInfo("generationRate") + (rInfo("generationRate") * ((tMax - tEnd) / (1000 + a)))) 	--4000	200		``500 ТО РЕАЛЬНУЮ ГЕНЕРАЦИЮ УВЕЛИЧИВАЕМ НА 1%
+				fluxOut.setFlowOverride(rInfo("generationRate") + (rInfo("generationRate") * (((tMax - tEnd) / 1000) * (rInfo("fuelConversion") / rInfo("maxFuelConversion"))))) 	--4000	200		``500 ТО РЕАЛЬНУЮ ГЕНЕРАЦИЮ УВЕЛИЧИВАЕМ НА 1%
 				
-				-- fluxOut.setFlowOverride(rInfo("generationRate") + (rInfo("generationRate") * 0.00005)) 	-- ТО РЕАЛЬНУЮ ГЕНЕРАЦИЮ УВЕЛИЧИВАЕМ НА 1%
+				
 			elseif (tEnd - tStart) > 0.001 then
 				
 				
-				fluxOut.setFlowOverride((rInfo("generationRate")) + (rInfo("generationRate") * ((tMax - tEnd) / (200 + a))))   -- 300	400			700    500 МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
+				-- fluxOut.setFlowOverride((rInfo("generationRate")) + (rInfo("generationRate") * ((tMax - tEnd) / (3000 + a))))   -- 300	400			700    500 МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
+				fluxOut.setFlowOverride(rInfo("generationRate") + (rInfo("generationRate") * (((tMax - tEnd) / 2000) * (rInfo("fuelConversion") / rInfo("maxFuelConversion")))))   -- 300	400			700    500 МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
 			end
 		
 --[[
@@ -101,7 +103,13 @@ local function main(temerature)
 
 		
 		elseif (tEnd - tMax) > 0.001 then
-			fluxOut.setFlowOverride((rInfo("generationRate")) - ((rInfo("generationRate") * (tEnd - tMax)) / (150 + b)))  -- 	200				500 Это супер множитель МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
+			-- fluxOut.setFlowOverride((rInfo("generationRate")) - ((rInfo("generationRate") * (tEnd - tMax)) / (150 + b)))  --200 1000	200				500 Это супер множитель МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
+			
+			
+			
+			
+																										я тут, 500 было много, 100 очень мало, нужно попробовать 250
+			fluxOut.setFlowOverride(rInfo("generationRate") - (rInfo("generationRate") * ((tEnd - tMax) / 100) *(rInfo("fuelConversion") / rInfo("maxFuelConversion"))))  --200 1000	200				500 Это супер множитель МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
 		else 
 			fluxOut.setFlowOverride(rInfo("generationRate"))		
 		end
