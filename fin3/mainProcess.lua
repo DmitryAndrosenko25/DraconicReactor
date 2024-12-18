@@ -92,8 +92,8 @@ local function main(temerature)
 				
 				
 				-- fluxOut.setFlowOverride((rInfo("generationRate")) + (rInfo("generationRate") * ((tMax - tEnd) / (3000 + a))))   -- 300	400			700    500 МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
-				fluxOut.setFlowOverride(rInfo("generationRate") + (rInfo("generationRate") * (((tMax - tEnd) / 2000) * (rInfo("fuelConversion") / rInfo("maxFuelConversion")))))   -- 300	400			700    500 МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
-			end
+				fluxOut.setFlowOverride(rInfo("generationRate") + (rInfo("generationRate") * (((tMax - tEnd) / 2000) * ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 0.0001))))   -- 300	400			700    500 МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
+			end																																									--0.10
 		
 --[[
 			При конвертации > 40% - температура прыгает +-0.1 примерно. так же при перезаходе к хуям все бахает, нужно чтото делать со щитом
@@ -108,8 +108,8 @@ local function main(temerature)
 			
 			
 			
-																										я тут, 500 было много, 100 очень мало, нужно попробовать 250
-			fluxOut.setFlowOverride(rInfo("generationRate") - (rInfo("generationRate") * ((tEnd - tMax) / 100) *(rInfo("fuelConversion") / rInfo("maxFuelConversion"))))  --200 1000	200				500 Это супер множитель МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
+																										-- я тут, 500 было много, 100 очень мало, нужно попробовать 250	--0.25			0.9
+			fluxOut.setFlowOverride(rInfo("generationRate") - (rInfo("generationRate") * ((tEnd - tMax) / 25) *((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 0.2ЯТУТ!!!!!!!!!!!0)))  --200 1000	200				500 Это супер множитель МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
 		else 
 			fluxOut.setFlowOverride(rInfo("generationRate"))		
 		end
