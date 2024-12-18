@@ -109,7 +109,7 @@ local function main(temerature)
 			
 			
 																										-- я тут, 500 было много, 100 очень мало, нужно попробовать 250	--0.25			0.9
-			fluxOut.setFlowOverride(rInfo("generationRate") - (rInfo("generationRate") * ((tEnd - tMax) / 25) *((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 0.2ЯТУТ!!!!!!!!!!!0)))  --200 1000	200				500 Это супер множитель МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
+			fluxOut.setFlowOverride(rInfo("generationRate") - (rInfo("generationRate") * ((tEnd - tMax) / 25) *((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 0.20)))  --200 1000	200				500 Это супер множитель МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
 		else 
 			fluxOut.setFlowOverride(rInfo("generationRate"))		
 		end
