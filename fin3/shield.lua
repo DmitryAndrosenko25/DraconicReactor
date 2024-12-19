@@ -51,12 +51,13 @@ function shield.runShieldExtreme()
 		--if (((reactorInfo("maxFieldStrength") / reactorInfo("fieldStrength")) *100) < 5) then 	-- ПРИ ТЕСТИРОВАНИИ 13000 ГРАДУСОВ ЩИТ ДЕРЖАЛСЯ В ПРЕДЕЛАХ 8.63%
 		
 		-- ЕСЛИ БОЛЬШЕ 1% МАКС ЩИТА И СКОРОСТЬ ПОГЛОЩЕНИЯ МЕНЬШЕ ДРЕЙНА + 600
-		if ((reactorInfo("maxFieldStrength") * 0.01) <	reactorInfo("fieldStrength")) and (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") + 1200))then --0.04
+												--0.01
+		if ((reactorInfo("maxFieldStrength") * 0.001) <	reactorInfo("fieldStrength")) and (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") + 1200))then --0.04
 			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate"))		
 		
 		--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		
-		elseif ((reactorInfo("maxFieldStrength") * 0.009) <	reactorInfo("fieldStrength")) and (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") + 1200)) then --0.04
+													--0.009
+		elseif ((reactorInfo("maxFieldStrength") * 0.0009) <	reactorInfo("fieldStrength")) and (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") + 1200)) then --0.04
 		
 			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 600)
 		

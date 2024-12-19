@@ -68,6 +68,8 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 	
 	local correction = 0
 	
+	local multy = 1 -----------------------------------------
+	
 	while tCurrent < tempMax do 
 		coroutine.resume(coroutineShield)
 		tCurrent = rInfo("temperature")
@@ -75,9 +77,30 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
         tEnd = rInfo("temperature")
         tDelta = (tEnd - tCurrent)		
 		if (tDelta < ((tempMax - tCurrent) / 200)) then -- 200!!!!
+			-----------------------------------------
+			multy = 1
+			if (tempMax - tCurrent) > 1000 then
+				multy = 4
+			elseif (tempMax - tCurrent) > 300 then
+				multy = 2.5					
+			elseif (tempMax - tCurrent) > 200 then
+				multy = 1.5
+			elseif (tempMax - tCurrent) > 100 then
+				multy = 1.25				
+			elseif (tempMax - tCurrent) > 10 then
+				multy = 1
+			elseif (tempMax - tCurrent) > 1 then
+				multy = 0.999
+			elseif (tempMax - tCurrent) > 0.1 then
+				multy = 0.99
+			else										----------------------------------------- последняя коррекция
+				multy = 0.95
+				-- print ("multy = 0.9999")
+			end			
+			-----------------------------------------
 			local saturat = rInfo("maxEnergySaturation") - (rInfo("maxEnergySaturation") - rInfo("energySaturation"))			
 			correction = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) / 200  -- 150 ТАК САБЕ РАБОТАЕТ
-			fluxOutGate.setFlowOverride((((rInfo("generationRate") * (tempMax / tCurrent)) + ((saturat /20) /100)) * (1 - correction)) + 1) 
+			fluxOutGate.setFlowOverride(((((rInfo("generationRate") * (tempMax / tCurrent)) + ((saturat /20) /100)) * (1 - correction)) + 1) * multy) -----------------------------------------
 		else
 			fluxOutGate.setFlowOverride(rInfo("generationRate") + 1)		
 		end

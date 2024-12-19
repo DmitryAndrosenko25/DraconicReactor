@@ -76,47 +76,21 @@ local function main(temerature)
 			end
 		end
 		
-		
-		-- a = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 5000 --		200	50		100					200!!!!!!!			100
-		-- b = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 40 -- 50	100	200	50		100					200!!!!!!!			100
-		
 		if (tMax - tEnd) > 0.001 then			
-			if (tStart > tEnd) then																		-- ЕСЛИ ТЕМПЕРАТУРА НИЖЕ НУЖНОЙ И ПРОДОЛЖАЕТ ПАДАТЬ
-				
-								
-				-- fluxOut.setFlowOverride(rInfo("generationRate") + (rInfo("generationRate") * ((tMax - tEnd) / (1000 + a)))) 	--4000	200		``500 ТО РЕАЛЬНУЮ ГЕНЕРАЦИЮ УВЕЛИЧИВАЕМ НА 1%
-				fluxOut.setFlowOverride(rInfo("generationRate") + (rInfo("generationRate") * (((tMax - tEnd) / 1000) * (rInfo("fuelConversion") / rInfo("maxFuelConversion"))))) 	--4000	200		``500 ТО РЕАЛЬНУЮ ГЕНЕРАЦИЮ УВЕЛИЧИВАЕМ НА 1%
-				
-				
-			elseif (tEnd - tStart) > 0.001 then
-				
-				
-				-- fluxOut.setFlowOverride((rInfo("generationRate")) + (rInfo("generationRate") * ((tMax - tEnd) / (3000 + a))))   -- 300	400			700    500 МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
-				fluxOut.setFlowOverride(rInfo("generationRate") + (rInfo("generationRate") * (((tMax - tEnd) / 2000) * ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 0.0001))))   -- 300	400			700    500 МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
-			end																																									--0.10
-		
---[[
-			При конвертации > 40% - температура прыгает +-0.1 примерно. так же при перезаходе к хуям все бахает, нужно чтото делать со щитом
-=====================================================================================================================================================
---]]
-
-
-		
-		elseif (tEnd - tMax) > 0.001 then
-			-- fluxOut.setFlowOverride((rInfo("generationRate")) - ((rInfo("generationRate") * (tEnd - tMax)) / (150 + b)))  --200 1000	200				500 Это супер множитель МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
+			if (tStart > tEnd)	then
+				fluxOut.setFlowOverride(rInfo("generationRate") + (rInfo("generationRate") * (((tMax - tEnd) / 1000) * (rInfo("fuelConversion") / rInfo("maxFuelConversion")))))
+			elseif (tEnd - tStart) > 0.001 then -- ЕСЛИ ТЕМПЕРАТУРА НИЖЕ НУЖНОЙ И ПРОДОЛЖАЕТ ПАДАТЬ
+				fluxOut.setFlowOverride(rInfo("generationRate") + (rInfo("generationRate") * (((tMax - tEnd) / 2000) * ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 0.0001))))
+			end
 			
-			
-			
-			
-																										-- я тут, 500 было много, 100 очень мало, нужно попробовать 250	--0.25			0.9
-			fluxOut.setFlowOverride(rInfo("generationRate") - (rInfo("generationRate") * ((tEnd - tMax) / 25) *((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 0.20)))  --200 1000	200				500 Это супер множитель МНОЖЕТЕЛЬ МЕНЯТЬ ТУТ
+		elseif (tEnd - tMax) > 0.001 then -- ЕСЛИ ТЕМПЕРАТУРА ВЫШЕ НУЖНОЙ
+			fluxOut.setFlowOverride(rInfo("generationRate") - (rInfo("generationRate") * ((tEnd - tMax) / 25) *((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 0.20)))
 		else 
 			fluxOut.setFlowOverride(rInfo("generationRate"))		
 		end
-		print(tEnd)
 		
-		-- Остановка реактора при 90% конвертации - но ЛУЧШЕ при 80-85%
-		if ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 100) >= 80 then --95 then-- 95% (--97% = BOOM!!!)
+		-- Остановка реактора при 80%
+		if ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 100) >= 80 then
 			reactor.stopReactor()
 			print((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 100)
 			isRunning = false
