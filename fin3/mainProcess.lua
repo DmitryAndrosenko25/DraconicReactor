@@ -63,8 +63,7 @@ local function main(temerature)
         tEnd = rInfo("temperature")
 		
 		
-		if math.abs(tMax - tEnd) > 1 then --10
-			-- ifStable = false
+		if math.abs(tMax - tEnd) > 1 then
 			coroutine.resume(coroutineShield)		
 			stableCount = 0
 		else
