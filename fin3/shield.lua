@@ -39,8 +39,7 @@ function shield.stopShield()
 	shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") * 1.5)
 	isRun = false
 	isRunExtreme = false
-	print("stopShield() выл вызван, все щиты остановлены. Вроде...")
-	
+	print("stopShield() выл вызван, все щиты остановлены. Вроде...")	
 end
 
 function shield.runShieldExtreme()
@@ -48,26 +47,15 @@ function shield.runShieldExtreme()
 	isRunExtreme = true
 	print("Extreme shield has been run")
 	while isRunExtreme do
-		--if (((reactorInfo("maxFieldStrength") / reactorInfo("fieldStrength")) *100) < 5) then 	-- ПРИ ТЕСТИРОВАНИИ 13000 ГРАДУСОВ ЩИТ ДЕРЖАЛСЯ В ПРЕДЕЛАХ 8.63%
-		
-		-- ЕСЛИ БОЛЬШЕ 1% МАКС ЩИТА И СКОРОСТЬ ПОГЛОЩЕНИЯ МЕНЬШЕ ДРЕЙНА + 600
-												--0.01
-		if ((reactorInfo("maxFieldStrength") * 0.001) <	reactorInfo("fieldStrength")) and (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") + 1200))then --0.04
-			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate"))		
-		
-		--!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-													--0.009
-		elseif ((reactorInfo("maxFieldStrength") * 0.0009) <	reactorInfo("fieldStrength")) and (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") + 1200)) then --0.04
-		
-			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 600)
-		
-		else																			-- 0.04	-- ПРИ ТЕСТИРОВАНИИ 13000 ГРАДУСОВ ЩИТ ДЕРЖАЛСЯ В ПРЕДЕЛАХ 8.63%
-			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 2000)	 			  		-- НУЖНО ДОБАВИТЬ АЛГОРИТМ ПОНИЖЕНИЯ В ТАКОМ СЛУЧАЕ ЩИТА ДО, НУ Я ХЗ... 5%
-		
-		
-		
-		-- else
-			-- shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 0) --200
+		if ((reactorInfo("maxFieldStrength") * 0.001) <	reactorInfo("fieldStrength")) and (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") + 1200))then
+			-- если сила щита достаточна И потребление избыточно ТО
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate"))
+			-- выставляем входящий инпут на значения потребления щита
+		elseif ((reactorInfo("maxFieldStrength") * 0.0009) < reactorInfo("fieldStrength")) and (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") + 1200)) then
+			-- если сила щита НЕ достаточна И потребление избыточно ТО
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 600)		
+		else
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 2000)
 		end
 		coroutine.yield() -- Уступает управление							
 	end
@@ -75,12 +63,3 @@ function shield.runShieldExtreme()
 end
 
 return shield -- Возврат модуля управления щита
-
-		--*1 	~ от 0 до ~0.5%  Экстримальный вариант  = rInfo("fieldDrainRate") + 100
-		--1.05 	~4 до 9
-		--*1.1	~9.00 - 9.30%
-		--*1.5 	~33.33
-		--*2 	50%
-		--*3 	~66.7
-		--*4 	~75.11
-		--*5	~80

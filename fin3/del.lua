@@ -11,22 +11,6 @@ function rInfo(info) --- на вход параметр реактора в stri
     return st[info]
 end
 
-
-
-
-
--- fluxOut.setOverrideEnabled(false)
--- fluxIn.setOverrideEnabled(true)
-
-
--- while true do
-	-- fluxIn.setFlowOverride((rInfo("fieldDrainRate")))
-	-- print(rInfo("fieldDrainRate"))
-	-- os.sleep(0.05)
--- end
-
-
-
 print("temperature " .. "__________" .. rInfo("temperature"))
 print("fieldStrength " .. "__________" .. rInfo("fieldStrength"))
 print("maxFieldStrength " .. "__________" .. rInfo("maxFieldStrength"))
@@ -38,21 +22,3 @@ print("generationRate " .. "__________" .. rInfo("generationRate"))
 print("fieldDrainRate " .. "__________" .. rInfo("fieldDrainRate"))
 print("fuelConversionRate " .. "__________" .. rInfo("fuelConversionRate"))
 print("status " .. "__________" .. rInfo("status") .. "/n")
-
-
--- st = reactor.getReactorInfo()
-
--- for i, v in pairs(st) do -- Перебираем таблицу с адресами
-	-- print(i .. "$$$$$$$" .. v)
--- end
-				-- temperature, 
--- fieldStrength, 
--- maxFieldStrength, 
--- energySaturation, 
--- maxEnergySaturation, 
--- fuelConversion, 
--- maxFuelConversion, 
--- generationRate, 
--- fieldDrainRate, 
--- fuelConversionRate, 
--- status]",

@@ -66,9 +66,8 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 	local tEnd = nil
 	local tDelta = nil
 	
-	local correction = 0
-	
-	local multy = 1 -----------------------------------------
+	local correction = 0	
+	local multy = 1
 	
 	while tCurrent < tempMax do 
 		coroutine.resume(coroutineShield)
@@ -94,15 +93,14 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 			elseif (tempMax - tCurrent) > 0.1 then
 				multy = 0.99
 			else										----------------------------------------- последняя коррекция
-				multy = 0.95
-				-- print ("multy = 0.9999")
+				multy = 0.95				
 			end			
 			-----------------------------------------
 			local saturat = rInfo("maxEnergySaturation") - (rInfo("maxEnergySaturation") - rInfo("energySaturation"))			
-			correction = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) / 200  -- 150 ТАК САБЕ РАБОТАЕТ
-			fluxOutGate.setFlowOverride(((((rInfo("generationRate") * (tempMax / tCurrent)) + ((saturat /20) /100)) * (1 - correction)) + 1) * multy) -----------------------------------------
+			correction = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) / 200
+			fluxOutGate.setFlowOverride(((((rInfo("generationRate") * (tempMax / tCurrent)) + ((saturat /20) /100)) * (1 - correction)) + 1) * multy)
 		else
-			fluxOutGate.setFlowOverride(rInfo("generationRate") + 1)		
+			fluxOutGate.setFlowOverride(rInfo("generationRate") + 1)
 		end
     end
     print("Реактор разогрет до ", rInfo("temperature"))

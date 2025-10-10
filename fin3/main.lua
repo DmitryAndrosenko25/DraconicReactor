@@ -5,6 +5,9 @@
 -- ПОКА ЧТО НЕ ЗАДЕЙСТВОВАН НИГДЕ
 
 
+
+--[[
+
 reactorInit = require("reactorInit")
 -- reactorHeating = require("reactorHeating")
 -- shield = require("shield")
@@ -22,3 +25,5 @@ local function rInfo(info) --- на вход параметр реактора �
     st = reactor.getReactorInfo()
     return st[info]
 end
+
+]]--
