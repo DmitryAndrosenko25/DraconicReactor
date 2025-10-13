@@ -109,7 +109,125 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 		tempMax (требуемой рабочей температуры например 8000 ) устаканилось и небыло +- килломер, тоесть +- 0.1 градуса
 		??????????????????????????????????????????????????????????????????????????????????????????????????????????????
 	]]--
+	local flagGood = 0
+	local flagBad = 0
+	local flagTempDelta = 0
 	
+	local force = fluxOutGate.getFlow() --ПОСТАРАЮСЬ НЕ ИСПОЛЬЗОВАТЬ ЭТУ ПЕРЕМЕННУЮ
+	local flagBalanceU = 0 -- переменная балансир, когда силы основной формулы не хватает для балансировки 
+	local flagBalanceD = 0 -- переменная балансир, когда силы основной формулы не хватает для балансировки
+	local flagTempStart = rInfo("temperature")
+	local flagTempEnd = rInfo("temperature")
+	
+	-- local flagUP = 0
+	-- local flagDOWN = 0
+	
+	
+	print("\n Мы сейчас на этапе стабилизации рабочей температуры после разогрева \n")
+	
+	while (flagGood <= 1000) or (flagBad <= 5000) do
+		
+		coroutine.resume(coroutineShield)
+		tCurrent = rInfo("temperature")
+		flagTempStart = rInfo("temperature")
+		
+		-- если температура в балансе, тоесть tempMax - tCurrent < 0.001 то flagGood +=1 else flagBad +=1
+		
+        flagTempDelta = math.abs(tempMax - tCurrent)
+		
+		-- этот иф исключительно для учета диагностических флагов
+		if flagTempDelta > 0.005 then 
+			
+			if tempMax > tCurrent then 
+				if flagTempStart >= flagTempEnd then -- Этот иф нужен, если во время необходимости поднятия температуры она падает или стоит на месте
+					flagBalanceU = flagBalanceU + 1
+					print("ПРОВЕРКА flagBalanceU  - " .. flagBalanceU)
+				end
+				
+				fluxOutGate.setFlowOverride(rInfo("generationRate") + (((rInfo("generationRate") * (1 - (tCurrent / tempMax))) * 0.0005) + flagBalanceU))
+				
+				
+				
+				
+				
+				flagBalanceD = 1
+				-- os.sleep(0.05)
+			else
+				if flagTempEnd >= flagTempStart then -- Этот иф нужен, если во время необходимости понижения температуры она растет или стоит на месте
+					flagBalanceD = flagBalanceD + 1
+					print("ПРОВЕРКА flagBalanceD  - " .. flagBalanceD)
+				end
+				
+				
+				
+				
+				
+				
+				
+				-- fluxOutGate.setFlowOverride(rInfo("generationRate") - (((rInfo("generationRate") * (1 - (tempMax/tCurrent))) * 0.0005) + flagBalanceD))
+				fluxOutGate.setFlowOverride(rInfo("generationRate") - (((rInfo("generationRate") * (1 - (tempMax/tCurrent))) * 0.0005) + flagBalanceD))
+				flagBalanceU = 1
+				-- os.sleep(0.05)
+			end
+			print("bad \n")
+			print("flagBalanceD  - " .. flagBalanceD)
+			print("flagBalanceU  - " .. flagBalanceU)
+		else	
+			-- if flagBalanceU > 1 then
+				-- flagBalanceU = flagBalanceU - 1
+			-- end
+			
+			-- if flagBalanceD > 1 then
+				-- flagBalanceD = flagBalanceD - 1
+			-- end
+			
+			-- flagBalanceU = 1
+			-- flagBalanceD = 1
+			
+			print("good \n")
+			print("flagBalanceD  - " .. flagBalanceD)
+			print("flagBalanceU  - " .. flagBalanceU)
+		
+		
+		end
+				os.sleep(0.05)
+		flagTempEnd = rInfo("temperature")
+		--[[
+		
+		if flagTempDelta < 0.001 then 
+			flagGood = flagGood + 1
+			
+			может быть уйдет РАСКОЛБАС
+			flagBalanceU = 1
+			flagBalanceD = 1
+			
+			
+			print("good \n")
+		else	
+			flagBad = flagBad + 1
+			
+			if tempMax > tCurrent then 
+				
+				fluxOutGate.setFlowOverride(force + (force * 0.001) + flagBalanceU)
+				flagBalanceU = flagBalanceU + 1 + (flagBalanceU * 0.01)
+				flagBalanceD = 1
+				
+			else
+
+				fluxOutGate.setFlowOverride((force - (force * 0.0005)) - flagBalanceD)
+				flagBalanceD = flagBalanceD + 1 
+				flagBalanceU = 1
+			end
+			
+			print("bad \n")
+		end
+		
+		]]--
+
+	end
+	
+	print("\n Этап стабилизации рабочей температуры после разогрева ЗАВЕРШЕН\n")
+	------
 	
 	
     print("Реактор разогрет до ", rInfo("temperature"))
