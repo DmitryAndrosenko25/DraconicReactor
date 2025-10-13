@@ -119,10 +119,6 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 	local flagTempStart = rInfo("temperature")
 	local flagTempEnd = rInfo("temperature")
 	
-	-- local flagUP = 0
-	-- local flagDOWN = 0
-	
-	
 	print("\n Мы сейчас на этапе стабилизации рабочей температуры после разогрева \n")
 	
 	while (flagGood <= 1000) or (flagBad <= 5000) do
@@ -131,7 +127,7 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 		tCurrent = rInfo("temperature")
 		flagTempStart = rInfo("temperature")
 		
-		-- если температура в балансе, тоесть tempMax - tCurrent < 0.001 то flagGood +=1 else flagBad +=1
+		
 		
         flagTempDelta = math.abs(tempMax - tCurrent)
 		
@@ -139,21 +135,28 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 		if flagTempDelta > 0.005 then 
 			
 			if tempMax > tCurrent then 
-				if flagTempStart >= flagTempEnd then -- Этот иф нужен, если во время необходимости поднятия температуры она падает или стоит на месте
+				if flagTempEnd >= flagTempStart then -- Этот иф нужен, если во время необходимости поднятия температуры она падает или стоит на месте
 					flagBalanceU = flagBalanceU + 1
 					print("ПРОВЕРКА flagBalanceU  - " .. flagBalanceU)
 				end
 				
-				fluxOutGate.setFlowOverride(rInfo("generationRate") + (((rInfo("generationRate") * (1 - (tCurrent / tempMax))) * 0.0005) + flagBalanceU))
+				fluxOutGate.setFlowOverride(rInfo("generationRate") + (((rInfo("generationRate") * (1 - (tCurrent / tempMax))) * 0.5) + flagBalanceU))
 				
 				
 				
+				if flagBalanceD > 1 then
+					flagBalanceD = flagBalanceD - 1
+				else
+					flagBalanceD = 1
+				end
 				
 				
-				flagBalanceD = 1
 				-- os.sleep(0.05)
-			else
-				if flagTempEnd >= flagTempStart then -- Этот иф нужен, если во время необходимости понижения температуры она растет или стоит на месте
+			elseif tCurrent > tempMax then
+			
+				print("elseif tCurrent > tempMax then")
+			
+				if flagTempStart >= flagTempEnd then -- Этот иф нужен, если во время необходимости понижения температуры она растет или стоит на месте
 					flagBalanceD = flagBalanceD + 1
 					print("ПРОВЕРКА flagBalanceD  - " .. flagBalanceD)
 				end
@@ -165,24 +168,20 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 				
 				
 				-- fluxOutGate.setFlowOverride(rInfo("generationRate") - (((rInfo("generationRate") * (1 - (tempMax/tCurrent))) * 0.0005) + flagBalanceD))
-				fluxOutGate.setFlowOverride(rInfo("generationRate") - (((rInfo("generationRate") * (1 - (tempMax/tCurrent))) * 0.0005) + flagBalanceD))
-				flagBalanceU = 1
+				fluxOutGate.setFlowOverride(rInfo("generationRate") - (((rInfo("generationRate") * (1 - (tempMax/tCurrent))) * 1) + flagBalanceD))
+				
+				if flagBalanceU > 1 then
+					flagBalanceU = flagBalanceU - 1
+				else
+					flagBalanceU = 1				
+				end
+				
 				-- os.sleep(0.05)
 			end
 			print("bad \n")
 			print("flagBalanceD  - " .. flagBalanceD)
 			print("flagBalanceU  - " .. flagBalanceU)
 		else	
-			-- if flagBalanceU > 1 then
-				-- flagBalanceU = flagBalanceU - 1
-			-- end
-			
-			-- if flagBalanceD > 1 then
-				-- flagBalanceD = flagBalanceD - 1
-			-- end
-			
-			-- flagBalanceU = 1
-			-- flagBalanceD = 1
 			
 			print("good \n")
 			print("flagBalanceD  - " .. flagBalanceD)
@@ -190,8 +189,13 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 		
 		
 		end
-				os.sleep(0.05)
+		
+		
+		-- os.sleep(0.05)
 		flagTempEnd = rInfo("temperature")
+		
+		os.sleep(0.05)
+		
 		--[[
 		
 		if flagTempDelta < 0.001 then 
