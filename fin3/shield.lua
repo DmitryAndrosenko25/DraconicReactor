@@ -47,6 +47,9 @@ function shield.runShieldExtreme()
 	isRunExtreme = true
 	print("Extreme shield has been run")
 	while isRunExtreme do
+	
+	
+		-- если сила щита реактора БОЛЬШЕ 0.1% от МАКСИМУМА и сила щита больще ПОТРЕБЛЕНИЯ + 1200 ТО ПОТРЕБЛЯЙ
 		if ((reactorInfo("maxFieldStrength") * 0.001) <	reactorInfo("fieldStrength")) and (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") + 1200))then
 			-- если сила щита достаточна И потребление избыточно ТО
 			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate"))
@@ -57,7 +60,30 @@ function shield.runShieldExtreme()
 		else
 			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 2000)
 		end
-		coroutine.yield() -- Уступает управление							
+		coroutine.yield() -- Уступает управление
+	
+	
+	
+	
+	
+	
+	
+		--[[ ЭТО РАБОЧИЙ АЛГОРИТМ
+		-- если сила щита реактора БОЛЬШЕ 0.1% от МАКСИМУМА и сила щита больще ПОТРЕБЛЕНИЯ + 1200 ТО ПОТРЕБЛЯЙ
+		if ((reactorInfo("maxFieldStrength") * 0.001) <	reactorInfo("fieldStrength")) and (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") + 1200))then
+			-- если сила щита достаточна И потребление избыточно ТО
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate"))
+			-- выставляем входящий инпут на значения потребления щита
+		elseif ((reactorInfo("maxFieldStrength") * 0.0009) < reactorInfo("fieldStrength")) and (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") + 1200)) then
+			-- если сила щита НЕ достаточна И потребление избыточно ТО
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 600)		
+		else
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") + 2000)
+		end
+		coroutine.yield() -- Уступает управление
+		]]
+		
+		
 	end
 	print("Я умер! Умер навсегда! З.Ы. Я был Экстримальный щит")
 end
