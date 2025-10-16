@@ -48,26 +48,20 @@ function shield.runShieldExtreme()
 	print("Extreme shield has been run")
 	local shieldbalance = 1
 	
-	while isRunExtreme do
-	
-		-- shiledForceIn = shieldfluxIn.getFlow()
-		-- ЕСЛИ ЗАРЯД ЩИТА БОЛЬШЕ 0.1% ОТ МАКСИМУМА И БОЛЬШЕ 101% ОТ ПОТРЕБЛЕНИЯ
-		-- if (reactorInfo("fieldStrength") > (reactorInfo("maxFieldStrength") * 0.001)) and (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.01 )) then
+	while isRunExtreme do	
 		if (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.01 )) then
-			if reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.1 ) then
-				shieldbalance = 1 --!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			elseif reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.03 ) then
+			if reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.3 ) then
+				shieldbalance = 1
+			elseif reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.04 ) then
 				if shieldbalance > 0 then
 					shieldbalance = shieldbalance - 1
-				end 
-				
-				-- 101 ЭТО ВИДИМО ОЧЕНЬ МАЛО!!!!!!!!!!
-				
-				
-			elseif reactorInfo("fieldStrength") < (reactorInfo("fieldDrainRate") * 1.01 ) then
+				end
+			elseif reactorInfo("fieldStrength") < (reactorInfo("fieldDrainRate") * 1.02 ) then
 				shieldbalance = shieldbalance + 1
 			end
-			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate")	* (1 + (0.0001 * shieldbalance))) --?????????????????????????
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate")	* (1 + (0.0001 * shieldbalance)))
+		else
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") * 1.1)
 		end
 		coroutine.yield() -- Уступает управление
 	end
