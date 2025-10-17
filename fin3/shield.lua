@@ -49,21 +49,25 @@ function shield.runShieldExtreme()
 	local shieldbalance = 1
 	
 	while isRunExtreme do	
-		if (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.05 )) then
-			if reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.5 ) then
-				shieldbalance = 1
-			elseif reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.09 ) then
-				if shieldbalance > 0 then
-					shieldbalance = shieldbalance - 1
-				end
-			elseif reactorInfo("fieldStrength") < (reactorInfo("fieldDrainRate") * 1.04 ) then
-				shieldbalance = shieldbalance + 1
+		if reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.5 ) then
+			shieldbalance = 1
+		elseif reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.05 ) then
+			if shieldbalance > 1 then
+				shieldbalance = shieldbalance - 1
 			end
-			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate")	* (1 + (0.0001 * shieldbalance)))
-		else
-			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") * 1.1)
-			shieldbalance = shieldbalance + 10
+			
+		elseif reactorInfo("fieldStrength") < (reactorInfo("fieldDrainRate") * 1.03 ) then
+			shieldbalance = shieldbalance + 1
 		end
+		
+		if (reactorInfo("fieldStrength") < (reactorInfo("fieldDrainRate") * 1.02 )) then
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") * 1.1)
+			shieldbalance = shieldbalance + 5
+		else
+			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate")	* (1 + (0.0001 * shieldbalance))) --0.0001
+		end
+		
+		
 		coroutine.yield() -- Уступает управление
 	end
 	print("Я умер! Умер навсегда! З.Ы. Я был Экстримальный щит")
