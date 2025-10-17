@@ -49,19 +49,20 @@ function shield.runShieldExtreme()
 	local shieldbalance = 1
 	
 	while isRunExtreme do	
-		if (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.01 )) then
-			if reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.3 ) then
+		if (reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.05 )) then
+			if reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.5 ) then
 				shieldbalance = 1
-			elseif reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.04 ) then
+			elseif reactorInfo("fieldStrength") > (reactorInfo("fieldDrainRate") * 1.09 ) then
 				if shieldbalance > 0 then
 					shieldbalance = shieldbalance - 1
 				end
-			elseif reactorInfo("fieldStrength") < (reactorInfo("fieldDrainRate") * 1.02 ) then
+			elseif reactorInfo("fieldStrength") < (reactorInfo("fieldDrainRate") * 1.04 ) then
 				shieldbalance = shieldbalance + 1
 			end
 			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate")	* (1 + (0.0001 * shieldbalance)))
 		else
 			shieldfluxIn.setFlowOverride(reactorInfo("fieldDrainRate") * 1.1)
+			shieldbalance = shieldbalance + 10
 		end
 		coroutine.yield() -- Уступает управление
 	end

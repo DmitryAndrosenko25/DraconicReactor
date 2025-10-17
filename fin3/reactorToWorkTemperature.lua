@@ -63,105 +63,97 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 	fluxOutGate.setOverrideEnabled(true)
     fluxOutGate.setFlowOverride(rInfo("generationRate")) -- минимальный старт разогрева
 	
-	local tCurrent = rInfo("temperature")
+	local tMax = tempMax
+	local tStart = rInfo("temperature")
 	local tEnd = rInfo("temperature")
-	local tDelta = rInfo("temperature")
+	local tCurrent = rInfo("temperature")
 	
-	local correction = 0	
+	local correction = 0	---??????????????????
 	local multy = 1
 	
-	local flagGood = 0
-	local flagBad = 0
-	local flagTempDelta = 0
+	local flagGood = 0		--???????????????????
+	local flagBad = 0		--????????????????
+	local flagTempDelta = 0	--????????????????????
 	
-	local flagBalanceU = 0 -- переменная балансир, когда силы основной формулы не хватает для балансировки 
-	local flagBalanceD = 0 -- переменная балансир, когда силы основной формулы не хватает для балансировки
-	local flagTempStart = rInfo("temperature")
-	local flagTempEnd = rInfo("temperature") -- КАК ПОКАЗАЛА ПРАКТИКА ЭТО СТАРТ ИЗЗА ТОГО ЧТО ЦЫКЛ КРУТИТСЯ ПО КРУГУ
+	local costyl = 1
 	
+	local balanceU = 0 -- переменная балансир, когда силы основной формулы не хватает для балансировки 
+	local balanceD = 0 -- переменная балансир, когда силы основной формулы не хватает для балансировки
+	-- local flagTempStart = rInfo("temperature")
+	-- local flagTempEnd = rInfo("temperature") -- КАК ПОКАЗАЛА ПРАКТИКА ЭТО СТАРТ ИЗЗА ТОГО ЧТО ЦЫКЛ КРУТИТСЯ ПО КРУГУ
 	
+	print("этап: reactorToWorkTemperature метод: .startHeating")
 	
-	while tCurrent < tempMax do 
+	while  (not(math.abs (tMax - tEnd) < 0.02 )) and (not(flagGood > 100)) do --?????????????????????? 
 		coroutine.resume(coroutineShield)
 		tCurrent = rInfo("temperature")
         os.sleep(0.05) 
         tEnd = rInfo("temperature")
-        tDelta = (tEnd - tCurrent)		
-		if (tDelta < ((tempMax - tCurrent) / 200)) then -- 200!!!!
-			-----------------------------------------
-			multy = 1
-			if (tempMax - tCurrent) > 1000 then
-				multy = 4
-			elseif (tempMax - tCurrent) > 300 then
-				multy = 2.5					
-			elseif (tempMax - tCurrent) > 200 then
-				multy = 1.5
-			elseif (tempMax - tCurrent) > 100 then
-				multy = 1.25				
-			elseif (tempMax - tCurrent) > 10 then
-				multy = 1
-			elseif (tempMax - tCurrent) > 1 then
-				multy = 0.999
-			elseif (tempMax - tCurrent) > 0.1 then
-				multy = 0.99
-			else										----------------------------------------- последняя коррекция
-				multy = 0.95				
-			end			
-			-----------------------------------------
-			local saturat = rInfo("maxEnergySaturation") - (rInfo("maxEnergySaturation") - rInfo("energySaturation"))			
-			correction = (rInfo("fuelConversion") / rInfo("maxFuelConversion")) / 200
-			fluxOutGate.setFlowOverride(((((rInfo("generationRate") * (tempMax / tCurrent)) + ((saturat /20) /100)) * (1 - correction)) + 1) * multy)
-		else
-			fluxOutGate.setFlowOverride(rInfo("generationRate") + 1)
-		end
-    end
-	
-	--[[	
-		После разогрева реактора до рабочей температуры, нужно дать минимальное время, чтобы точное значение 
-		tempMax (требуемой рабочей температуры например 8000 ) устаканилось и небыло +- килломер, тоесть +- 0.1 градуса
-		??????????????????????????????????????????????????????????????????????????????????????????????????????????????
-	]]--
-	while (flagGood <= 10) do
-	
-	
-		print("fluxInGate.getFlow()  - " .. fluxInGate.getFlow()) --????????????????????????????????????????????????????????????
-		
-		coroutine.resume(coroutineShield)
-		tCurrent = rInfo("temperature")
-		flagTempStart = rInfo("temperature")
-        flagTempDelta = math.abs(tempMax - tCurrent) -- вычисление наличия отклонения не важно в какую сторону
-		
-		-- этот иф исключительно для учета диагностических флагов
-		-- НО теперь это самая перспективная часть кода!!!!!!
-		
-		if flagTempDelta > 0.005 then 
+        
+		--[[
+			таблица примеров для tMax = 8000
 			
-			if tempMax > tCurrent then -- ЕСЛИ реактор не догрет до нужной температуры
-				if flagTempEnd >= flagTempStart then -- Этот иф нужен, если во время необходимости поднятия температуры она падает или стоит на месте
-					flagBalanceU = flagBalanceU + 1
-				end				
-				fluxOutGate.setFlowOverride(rInfo("generationRate") + (((rInfo("generationRate") * (1 - (tCurrent / tempMax))) * 0.01) + flagBalanceU)) --0.5
-				if flagBalanceD > 1 then
-					flagBalanceD = flagBalanceD - 1
-				else
-					flagBalanceD = 1
-				end				
-			elseif tCurrent > tempMax then
-				if flagTempStart >= flagTempEnd then -- Этот иф нужен, если во время необходимости понижения температуры она растет или стоит на месте
-					flagBalanceD = flagBalanceD + 1					
-				end				
-				fluxOutGate.setFlowOverride(rInfo("generationRate") - (((rInfo("generationRate") * (1 - (tempMax/tCurrent))) * 0.01) + flagBalanceD))  -- 1
-				if flagBalanceU > 1 then
-					flagBalanceU = flagBalanceU - 1
-				else
-					flagBalanceU = 1				
-				end
-			end	
+			если нынeшняя 13000 то tMax / 13000 = 0.61538
+			
+			если 6700 то tMax / 6700 = 1.1940
+		
+		]]
+		
+		multy = tMax / tEnd
+		
+		if math.abs (tMax - tEnd) > 2 then -- если разница реальной температуры от нужной больше 2-х градусов то 
+			
+			costyl = (rInfo("generationRate") * math.pow(multy, 2)) + (tMax - tEnd) --math.pow(multy, 2)
+			
+			
+			
+			
+			fluxOutGate.setFlowOverride(costyl)
+			
+			
+			-- ((rInfo("generationRate") * math.pow(multy, 2)) + (tMax - tEnd)) - 
+			 -- ((rInfo("generationRate") * ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * (rInfo("energySaturation")/ rInfo("maxEnergySaturation"))))))
+			
+			
+			-- print("temperature " .. "__________" .. rInfo("temperature"))
+-- print("fieldStrength " .. "__________" .. rInfo("fieldStrength"))
+-- print("maxFieldStrength " .. "__________" .. rInfo("maxFieldStrength"))
+-- print("energySaturation " .. "__________" .. rInfo("energySaturation"))
+-- print("maxEnergySaturation " .. "__________" .. rInfo("maxEnergySaturation"))
+-- print("fuelConversion " .. "__________" .. rInfo("fuelConversion"))
+-- print("maxFuelConversion " .. "__________" .. rInfo("maxFuelConversion"))
+-- print("generationRate " .. "__________" .. rInfo("generationRate"))
+-- print("fieldDrainRate " .. "__________" .. rInfo("fieldDrainRate"))
+-- print("fuelConversionRate " .. "__________" .. rInfo("fuelConversionRate"))
+-- print("status " .. "__________" .. rInfo("status") .. "/n")
+			
+			
 		else
+			
+			if(tMax - tEnd) > 0.04 then
+				balanceU = balanceU + 1 + (tMax - tEnd) + ((balanceU * 0.1) * rInfo("fuelConversion")/rInfo("maxFuelConversion"))
+				fluxOutGate.setFlowOverride(rInfo("generationRate") + balanceU)
+				
+				if flagGood > 0 then
+					flagGood = flagGood - 1
+				end
+			
+			elseif (tEnd - tMax) > 0.02 then
+				balanceD = balanceD + 1 + (tEnd - tMax) + ((balanceD * 0.1) * rInfo("fuelConversion")/rInfo("maxFuelConversion"))
+				fluxOutGate.setFlowOverride(rInfo("generationRate") - balanceD)
+				
+				if flagGood > 0 then
+					flagGood = flagGood - 1
+				end
+			
+			end
+			
+			balanceU = balanceU - 1 
+			balanceD = balanceD - 1
 			flagGood = flagGood + 1
 		end
-		flagTempEnd = rInfo("temperature")
-		os.sleep(0.05)
+	
+		-- os.sleep(0.05)
 	end
 	
 	print("\n Этап стабилизации рабочей температуры после разогрева ЗАВЕРШЕН\n")
@@ -169,7 +161,7 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 	
 	
     print("Реактор разогрет до ", rInfo("temperature"))
-	fluxOutGate.setFlowOverride( rInfo("generationRate"))
+	-- fluxOutGate.setFlowOverride( rInfo("generationRate"))
 end
 
 return reactorToWorkTemperature

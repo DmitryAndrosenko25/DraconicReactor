@@ -56,7 +56,7 @@ local function main(temerature)
 	
 	while isRunning do
 	
-		print("\n Мы сейчас на этапе основного рабочего метода после разогрева \n")
+		-- print("\n Мы сейчас на этапе основного рабочего метода после разогрева \n")
 		
 		coroutine.resume(coroutineShield)
 		tCurrent = rInfo("temperature")
@@ -112,7 +112,7 @@ local function main(temerature)
 			isRunning = false														--
 		end																			--
 		-----------------------------------
-	print('tCurrent = rInfo("temperature") - ' .. tCurrent) -- ВРЕМЕННАЯ ДИАГНОСТИЧЕСКАЯ СТРОКА
+	-- print('tCurrent = rInfo("temperature") - ' .. tCurrent) -- ВРЕМЕННАЯ ДИАГНОСТИЧЕСКАЯ СТРОКА
 	
 	end
 	
