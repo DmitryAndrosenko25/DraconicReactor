@@ -77,14 +77,20 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 	
 	local costyl = 1
 	
-	local balanceU = 0 -- переменная балансир, когда силы основной формулы не хватает для балансировки 
-	local balanceD = 0 -- переменная балансир, когда силы основной формулы не хватает для балансировки
+	-- local balanceU = 0 -- переменная балансир, когда силы основной формулы не хватает для балансировки 
+	-- local balanceD = 0 -- переменная балансир, когда силы основной формулы не хватает для балансировки
+	
+	
+	local balance = 0 -- переменная балансир, когда силы основной формулы не хватает для балансировки
+	
+	
 	-- local flagTempStart = rInfo("temperature")
 	-- local flagTempEnd = rInfo("temperature") -- КАК ПОКАЗАЛА ПРАКТИКА ЭТО СТАРТ ИЗЗА ТОГО ЧТО ЦЫКЛ КРУТИТСЯ ПО КРУГУ
 	
 	print("этап: reactorToWorkTemperature метод: .startHeating")
 	
-	while  (not(math.abs (tMax - tEnd) < 0.02 )) and (not(flagGood > 100)) do --?????????????????????? 
+	-- while  (not(math.abs (tMax - tEnd) < 0.02 )) and (flagGood < 100) do --?????????????????????? 
+	while  true do --?????????????????????? 
 		coroutine.resume(coroutineShield)
 		tCurrent = rInfo("temperature")
         os.sleep(0.05) 
@@ -101,14 +107,144 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 		
 		multy = tMax / tEnd
 		
-		if math.abs (tMax - tEnd) > 2 then -- если разница реальной температуры от нужной больше 2-х градусов то 
+		-- if math.abs (tMax - tEnd) > 2 then -- если разница реальной температуры от нужной больше 2-х градусов то 	
+		-- if math.abs (tMax - tEnd) > 0.03 then -- если разница реальной температуры от нужной больше 2-х градусов то
+
+		
+		-- if math.abs (tMax - tEnd) > 0.01 then -- если разница реальной температуры от нужной больше 2-х градусов то 
+		if math.abs (tMax - tEnd) > 0.01 then -- если разница реальной температуры от нужной больше 2-х градусов то -- 0.01
 			
-			costyl = (rInfo("generationRate") * math.pow(multy, 2)) + (tMax - tEnd) --math.pow(multy, 2)
+			-- costyl = (rInfo("generationRate") * math.pow(multy, 2)) + (tMax - tEnd) --math.pow(multy, 2)
+			costyl = (rInfo("generationRate") * math.pow(multy, 2)) + ((tMax - tEnd) * math.abs(tMax - tEnd)) --math.pow(multy, 2)
+			-- costyl = (rInfo("generationRate") * math.pow(multy, 2)) + 		math.pow((tMax - tEnd) * math.abs(tMax - tEnd), 2) --math.pow(multy, 2)
 			
+		
+
+		
+			-- balanceU = balanceU - 1 
+			-- balanceD = balanceD - 1
+		
+			-- if (tMax - tEnd) > 0.04 then
+			if tMax > tEnd then
+				balance = balance + 1
+				
+			elseif tEnd > tMax then
+				balance = balance - 1
 			
+			end
+		
+		
+		
+		
+		
+		
+		-- costyl = costyl + balance								-- ЭТО ОЧЕНЬ ГУД!!!!!!!!!!!!!!!!!!!!!!!!!
+		-- costyl = costyl + (balance * 1.01)
+		-- costyl = costyl + (balance * 1.1)
+		-- costyl = costyl + (balance * 1.5)
+		costyl = costyl + (balance * 0.98)
+	
+		fluxOutGate.setFlowOverride(costyl)
+		
+		--[=[
+		
+		elseif math.abs (tMax - tEnd) < 0.01 then
+		
+		
+		
+		
+		-- elseif math.abs (tMax - tEnd) > 0.02 then
+			-- balanceU = 1 
+			-- balanceD = 1
+			balanceD = balanceD - 1
+		    balanceU = balanceU - 1
 			
+			fluxOutGate.setFlowOverride(rInfo("generationRate"))
 			
-			fluxOutGate.setFlowOverride(costyl)
+		]=]
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		--[==[	
+		else
+			
+			if(tMax - tEnd) > 0.02 then
+				
+				
+				balanceU = balanceU + 1 + (tMax - tEnd) + ((balanceU * 0.1) * rInfo("fuelConversion")/rInfo("maxFuelConversion"))
+				-- balanceU = balanceU + 1 + (tMax - tEnd) + (balanceU * 0.1) -- * rInfo("fuelConversion")/rInfo("maxFuelConversion"))
+				
+				
+				-- balanceU = balanceU + 1 --+ (tMax - tEnd) + (balanceU * 0.1) -- * rInfo("fuelConversion")/rInfo("maxFuelConversion"))
+				
+				
+				-- balanceU = balanceU - 1 
+				if balanceD > 1 then
+					balanceD = balanceD - 1
+				end
+				
+				-- fluxOutGate.setFlowOverride(rInfo("generationRate") + balanceU)
+				fluxOutGate.setFlowOverride(costyl + balanceU)
+				
+				if flagGood > 0 then
+					flagGood = flagGood - 1
+				end
+			
+			elseif (tEnd - tMax) > 0.02 then
+				
+				
+				balanceD = balanceD + 1 + (tEnd - tMax) + ((balanceD * 0.1) * rInfo("fuelConversion")/rInfo("maxFuelConversion"))
+				-- balanceD = balanceD + 1 + (tEnd - tMax) + (balanceD * 0.1) -- * rInfo("fuelConversion")/rInfo("maxFuelConversion"))
+				-- balanceD = balanceD + 1 --+ (tEnd - tMax) + (balanceD * 0.1) -- * rInfo("fuelConversion")/rInfo("maxFuelConversion"))
+				
+				if balanceU > 1 then
+					balanceU = balanceU - 1 
+				end
+				-- balanceD = balanceD - 1
+				
+				
+				-- fluxOutGate.setFlowOverride(rInfo("generationRate") - balanceD)
+				fluxOutGate.setFlowOverride(costyl - balanceD)
+				
+				if flagGood > 0 then
+					flagGood = flagGood - 1
+				end
+			
+			end
+			
+			balanceU = balanceU - 1 
+			balanceD = balanceD - 1
+			flagGood = flagGood + 1
+			print("flagGood " .. flagGood)
+			]==]
+			
+		end
+	
+		-- os.sleep(0.05)
+	end
+	
+	print("\n Этап стабилизации рабочей температуры после разогрева ЗАВЕРШЕН\n")
+	------
+	
+	
+    print("Реактор разогрет до ", rInfo("temperature"))
+	-- fluxOutGate.setFlowOverride( rInfo("generationRate"))
+end
+
+return reactorToWorkTemperature
+
+
+
+
+
 			
 			
 			-- ((rInfo("generationRate") * math.pow(multy, 2)) + (tMax - tEnd)) - 
@@ -128,43 +264,13 @@ function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fl
 -- print("status " .. "__________" .. rInfo("status") .. "/n")
 			
 			
-		else
-			
-			if(tMax - tEnd) > 0.04 then
-				balanceU = balanceU + 1 + (tMax - tEnd) + ((balanceU * 0.1) * rInfo("fuelConversion")/rInfo("maxFuelConversion"))
-				fluxOutGate.setFlowOverride(rInfo("generationRate") + balanceU)
-				
-				if flagGood > 0 then
-					flagGood = flagGood - 1
-				end
-			
-			elseif (tEnd - tMax) > 0.02 then
-				balanceD = balanceD + 1 + (tEnd - tMax) + ((balanceD * 0.1) * rInfo("fuelConversion")/rInfo("maxFuelConversion"))
-				fluxOutGate.setFlowOverride(rInfo("generationRate") - balanceD)
-				
-				if flagGood > 0 then
-					flagGood = flagGood - 1
-				end
-			
-			end
-			
-			balanceU = balanceU - 1 
-			balanceD = balanceD - 1
-			flagGood = flagGood + 1
-		end
-	
-		-- os.sleep(0.05)
-	end
-	
-	print("\n Этап стабилизации рабочей температуры после разогрева ЗАВЕРШЕН\n")
-	------
-	
-	
-    print("Реактор разогрет до ", rInfo("temperature"))
-	-- fluxOutGate.setFlowOverride( rInfo("generationRate"))
-end
 
-return reactorToWorkTemperature
+
+
+
+
+
+
 
 
 
