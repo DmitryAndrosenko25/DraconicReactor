@@ -2,11 +2,16 @@ local component = require("component")
 local reactorInit = require("reactorInit")
 local reactorUpTo2000 = require("reactorUpTo2000")
 local reactorToWorkTemperature = require("reactorToWorkTemperature")
+local mainProcess = require("mainProcess")
 
 local a = reactorInit.getGatesAddresses() -- Получаем адреса по порядку: 1 реактор, 2 гейт вход, 3 гейт выход
 local reactorAddress = a[1]
+-- print("reactor ="..reactorAddress)
 local fluxInAddress = a[2]
+-- print("fluxInAddress ="..fluxInAddress)
 local fluxOutAddress = a[3]
+-- print("fluxOutAddress ="..fluxOutAddress) --temporary///////////////////
+
 local reactor = component.proxy(reactorAddress)
 local fluxIn = component.proxy(fluxInAddress)
 local fluxOut = component.proxy(fluxOutAddress)
