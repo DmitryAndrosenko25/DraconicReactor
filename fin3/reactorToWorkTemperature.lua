@@ -1,6 +1,5 @@
--- ПЕРЕРАБОТАННЫЙ МОДУЛЬ reactorToWorkTemperature.lua
--- Управляет разогревом и стабилизацией температуры реактора с помощью ПИД-регулятора
--- Добавлено логирование в файл pid_log.csv
+-- ДАННЫЙ МОДУЛЬ ПРИНИМАЕТ НА ВХОД ТРИ АДРЕСА + до какой температуры, ЗАПУСКАЕТ НЕОБХОДИМЫЙ РЕЖИМ ЩИТА
+-- И НАЧИНАЕТ ГРЕТЬ РЕАКТОР ДО РАБОЧЕЙ ТЕМПЕРАТУРЫ
 
 local reactorToWorkTemperature = {}
 
@@ -10,181 +9,143 @@ local reactor = nil
 local fluxInGate = nil
 local fluxOutGate = nil
 
-----------------------------------------------------------
--- PID параметры (подбираются вручную)
-----------------------------------------------------------
--- local Kp = 0.8     -- Пропорциональный коэффициент
--- local Kp = 400     -- Пропорциональный коэффициент
--- local Kp = 1000     -- Пропорциональный коэффициент
--- local Kp = 2000     -- Пропорциональный коэффициент
-
-
--- local Kp = 5000     -- Пропорциональный коэффициент
--- local Kp = 500000     -- Пропорциональный коэффициент
-
-
-local Kp = 4500     -- Пропорциональный коэффициент
--- local Kp = 45000     -- Пропорциональный коэффициент
-
--- local Ki = 0.02    -- Интегральный коэффициент
--- local Ki = 0.02    -- Интегральный коэффициент
-local Ki = 0.0    -- Интегральный коэффициент
--- local Kd = 0.5     -- Дифференциальный коэффициент
--- local Kd = 0.003     -- Дифференциальный коэффициент
-
--- local Kd = 8000.0     -- Дифференциальный коэффициент
-
--- local Kd = 64     -- Дифференциальный коэффициент
-local Kd = 128     -- Дифференциальный коэффициент
-
-----------------------------------------------------------
--- Прочие настройки
-----------------------------------------------------------
-local dt = 0.1               -- Интервал обновления (сек)
--- local integralLimit = 20000  -- ограничение интеграла (anti-windup)
-local integralLimit = 2000000  -- ограничение интеграла (anti-windup)
-local logFileName = "pid_log.csv"
-----------------------------------------------------------
-
--- Вспомогательная функция
-local function rInfo(info)
+local function rInfo(info) --- на вход параметр реактора в string ..на выход значение 
 	local st = reactor.getReactorInfo()
 	return st[info]
 end
 
--- Запуск реактора, если он не активен
-local function starter()
+local function starter()				-- Запуск разогретого до 2000 реактора/ перевод его в статус running
 	fluxOutGate.setOverrideEnabled(true)
-	fluxOutGate.setFlowOverride(0)
-
-	if rInfo("status") ~= "running" then
-		print("Попытка запуска реактора...")
-		if reactor.activateReactor() then
-			print("Реактор успешно запущен (из PID-модуля)")
-		else
-			local temp = fluxInGate.getFlow()
-			while not reactor.activateReactor() do
-				temp = temp + 1
-				fluxInGate.setFlowOverride(temp)
-				os.sleep(0.05)
-			end
-			print("Реактор успешно запущен (из PID-модуля)")
-		end
-	else
-		print("Реактор уже работает")
-	end
+    fluxOutGate.setFlowOverride(0)
+    
+    if rInfo("status") ~= "running" then         --ЗАПУСК РЕАКТОРА
+        if reactor.activateReactor() then 
+            print("Реактор запустился из модуля reactorToWorkTemperature")
+        else            
+            local temp = fluxInGate.getFlow()
+            local run = true
+            print("стартер реактора гудит...")
+            while run do         
+                if reactor.activateReactor() then
+                    run = false
+                else
+                    fluxInGate.setFlowOverride(temp +1)
+                    os.sleep(0.05)
+                    temp = fluxInGate.getFlow()
+                end
+            end
+            print("Реактор запустился из модуля reactorToWorkTemperature")
+        end
+    else
+       print("Реактор запущен из модуля reactorToWorkTemperature") 
+    end
 end
 
-----------------------------------------------------------
--- Функция записи строки в CSV лог
-----------------------------------------------------------
-local function writeLog(file, t, temp, error, flow, Kp, Ki, Kd)
-	file:write(string.format("%d,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f\n", t, temp, error, flow, Kp, Ki, Kd))
-end
-
-----------------------------------------------------------
--- Основная функция разогрева и стабилизации температуры
-----------------------------------------------------------
 function reactorToWorkTemperature.startHeating(reactorAddress, fluxInAddress, fluxOutAddress, tempMax)
-
-	reactor = component.proxy(reactorAddress)
-	fluxInGate = component.proxy(fluxInAddress)
-	fluxOutGate = component.proxy(fluxOutAddress)
-
-	-- Настройка щитов
-	print("→ Устанавливается экстремальный щит")
-	local coroutineShieldExtreme = coroutine.create(shield.runShieldExtreme)
-
-	print("→ Устанавливается безопасный щит")
-	shield.setReactor(reactorAddress, fluxInAddress)
-	shield.setLevel(1.4)
-	local coroutineShield = coroutine.create(shield.runShield)
-	coroutine.resume(coroutineShield)
-	print("✓ Безопасный щит активен")
-
-	-- Запуск реактора
+	
+	reactor = component.proxy(reactorAddress) 		-- Подключение к реактору и гейтам
+	fluxInGate = component.proxy(fluxInAddress)		--
+	fluxOutGate = component.proxy(fluxOutAddress)	--
+		
+	
+	print("Начинаются попытки установки экстремального щита")
+	local coroutineShieldExtrm = coroutine.create(shield.runShieldExtreme)	 --/ запуск щита
+	-- coroutine.resume(coroutineShieldExtrm) -- Выведет "Начало корутины"		--/
+	print("Попытки установки экстремального щита закончены")
+	
+	
+	
+	--===================================================================================
+	print("Начинаются попытки установки безопасного щита")
+	shield.setReactor(reactorAddress, fluxInAddress)	--\
+	shield.setLevel(1.4)												 --\ ~33% щита
+	local coroutineShield = coroutine.create(shield.runShield)		 	 --/ запуск щита
+	coroutine.resume(coroutineShield) -- Выведет "Начало корутины"		--/
+	print("Попытки установки безопасного щита закончены")
+	--===================================================================================
+	
+	
+	
 	if rInfo("status") ~= "running" then
-		starter()
-	end
-
-	----------------------------------------------------------
-	-- PID-переменные
-	----------------------------------------------------------
-	local setpoint = tempMax
-	local integral = 0
-	local prev_error = 0
-	local timeStep = 0
-
-	print(string.format("→ Начинается ПИД-контроль температуры до %.0f°C", tempMax))
+		starter()		
+	end	
+	--=============================ОСНОВНАЯ ЧАСТЬ РАЗОГРЕВА==========================================
+	print(string.format("Разогрев ректора до %d", tempMax))
 	fluxOutGate.setOverrideEnabled(true)
-	fluxOutGate.setFlowOverride(rInfo("generationRate"))  -- стартовое значение
-
-	----------------------------------------------------------
-	-- Подготовка файла лога
-	----------------------------------------------------------
-	local file = io.open(logFileName, "w")
-	if file then
-		file:write("time,temp,error,flow,Kp,Ki,Kd\n")
-	else
-		print("⚠️  Ошибка: не удалось открыть файл лога pid_log.csv для записи.")
-		return
-	end
-
-	local shieldCount = 0
-	local isRunning = true
-
-	while isRunning do
-		local temp = rInfo("temperature")
-		local error = setpoint - temp
-		integral = integral + error * dt
-
-		-- Anti-windup
-		if integral > integralLimit then integral = integralLimit end
-		if integral < -integralLimit then integral = -integralLimit end
-
-		local derivative = (error - prev_error) / dt
-
-		-- PID формула
-		local output = (Kp * error) + (Ki * integral) + (Kd * derivative)
-
-		-- Ограничим поток (flow)
-		local baseFlow = rInfo("generationRate")
-		local newFlow = baseFlow + output
-		if newFlow < 0 then newFlow = 0 end
-		if newFlow > baseFlow * 1.5 then newFlow = baseFlow * 1.5 end
-
-		fluxOutGate.setFlowOverride(newFlow)
-
-		-- Контроль щита
-		if math.abs(error) <= 0.2 then
-			shieldCount = shieldCount + 1
-		else
-			shieldCount = 0
-		end
-		if shieldCount >= 150 then
-			coroutine.resume(coroutineShieldExtreme)
-		else
+    fluxOutGate.setFlowOverride(rInfo("generationRate")) -- минимальный старт разогрева
+	
+	local tMax = tempMax
+	local tEnd = rInfo("temperature")
+	local multy = 1
+	local costyl = 1
+	local balance = 0 -- переменная балансир, когда силы основной формулы не хватает для балансировки
+	
+	local shieldCount = 0 -- от 0 до 150 счетчик, который переключает экстремальный и безопасный щита
+	
+	while true do --?????????????????????? 
+		
+		if rInfo("status") == "cold" then
+			multy = 1
+			costyl = 1
+			balance = 0
+			print ("реактор остановлен.")
+			break
+		elseif rInfo("status") == "cooling" then
+			multy = 1
+			costyl = 1
+			balance = 0			
+			fluxOutGate.setFlowOverride(0)
 			coroutine.resume(coroutineShield)
+		
+		--warming_up?????
+		
+		elseif rInfo("status") == "running" then
+			
+			
+		
+			if math.abs(tMax - tEnd) >= 0.2 then
+				shieldCount = 0
+			else
+				if shieldCount < 150 then
+					shieldCount = shieldCount + 1
+				end
+			end
+			
+			
+			if shieldCount < 150 then
+				coroutine.resume(coroutineShield)			
+			else
+				coroutine.resume(coroutineShieldExtrm)
+			end		
+			
+			os.sleep(0.05) 
+			tEnd = rInfo("temperature")		
+			multy = tMax / tEnd
+			
+			if math.abs (tMax - tEnd) > 0.000 then
+				costyl = (rInfo("generationRate") * math.pow(multy, 2)) + ((tMax - tEnd) * math.abs(tMax - tEnd))
+				if tMax > tEnd then
+					balance = balance + 1
+				elseif tEnd > tMax then
+					balance = balance - 1
+				end
+				
+				costyl = costyl + (balance * 0.4)
+				fluxOutGate.setFlowOverride(costyl)
+				
+				-- if ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 100) >= 90 then-- 90Слишком БОЛГО ждать охлада
+				-- if ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 100) >= 85 then--
+				if ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 100) >= 80 then--
+					coroutine.resume(coroutineShield)
+					reactor.stopReactor()													--	
+				end	
+			end
 		end
-
-		-- Логирование
-		writeLog(file, timeStep, temp, error, newFlow, Kp, Ki, Kd)
-
-		-- Условия остановки по топливу
-		if ((rInfo("fuelConversion") / rInfo("maxFuelConversion")) * 100) >= 80 then
-			print("⚠️  Топливо израсходовано на 80%, реактор останавливается.")
-			reactor.stopReactor()
-			isRunning = false
-		end
-
-		prev_error = error
-		timeStep = timeStep + dt
-		os.sleep(dt)
 	end
-
-	file:close()
-	print("✓ PID-логирование завершено. Файл: pid_log.csv")
-	print(string.format("Реактор стабилизирован при температуре %.2f°C", rInfo("temperature")))
+	
+	print("\n Этап стабилизации рабочей температуры после разогрева ЗАВЕРШЕН\n")
+	
+    print("Реактор разогрет до ", rInfo("temperature"))
 end
 
 return reactorToWorkTemperature
